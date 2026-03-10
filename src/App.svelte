@@ -7,6 +7,7 @@
   import SemesterPlanner from './components/SemesterPlanner.svelte'
   import CourseCard from './components/CourseCard.svelte'
   import { evaluate } from './lib/engine.js'
+  import { TAG_META } from './lib/tags.js'
 
   const frameworks = [frameworkA]
   let activeFrameworkIndex = 0
@@ -29,6 +30,24 @@
   $: evaluation = evaluate(activeFramework, placedCourses)
 
   let planOpen = false
+  let poolSearch = ''
+
+  function courseMatchesSearch(course, query) {
+    const q = query.toLowerCase()
+    if (course.title.toLowerCase().includes(q)) return true
+    if (course.code.toLowerCase().includes(q)) return true
+    return course.tags.some(t => {
+      const meta = TAG_META[t]
+      return meta && (
+        meta.label.toLowerCase().includes(q) ||
+        meta.short.toLowerCase().includes(q)
+      )
+    })
+  }
+
+  $: filteredPool = poolSearch.trim()
+    ? pool.filter(c => courseMatchesSearch(c, poolSearch.trim()))
+    : pool
   $: totalSections = activeFramework.sections?.length ?? 0
   $: satisfiedSections = Object.values(evaluation.sections).filter(s => s?.satisfied).length
 
@@ -104,9 +123,24 @@
       <div class="px-3 pt-4 pb-2 border-b border-gray-100 shrink-0">
         <h2 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Course Pool</h2>
         <p class="text-[10px] text-gray-400 mt-0.5">Click to place · drag to semester</p>
+        <div class="relative mt-2">
+          <input
+            type="search"
+            bind:value={poolSearch}
+            placeholder="Search title or tag…"
+            class="w-full text-xs rounded border border-gray-200 bg-gray-50 px-2 py-1 pr-6 placeholder-gray-300 focus:outline-none focus:border-odu-lightblue focus:bg-white"
+          />
+          {#if poolSearch}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <span
+              class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 cursor-pointer text-sm leading-none"
+              on:click={() => poolSearch = ''}
+            >✕</span>
+          {/if}
+        </div>
       </div>
       <div class="grid grid-cols-2 gap-2 p-3 content-start">
-        {#each pool as course (course.id)}
+        {#each filteredPool as course (course.id)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div on:click={() => addToFirstAvailable(course)}>
             <CourseCard
@@ -115,8 +149,10 @@
             />
           </div>
         {/each}
-        {#if pool.length === 0}
-          <p class="text-gray-400 text-xs italic text-center col-span-2 mt-4">All courses placed.</p>
+        {#if filteredPool.length === 0}
+          <p class="text-gray-400 text-xs italic text-center col-span-2 mt-4">
+            {pool.length === 0 ? 'All courses placed.' : 'No matches.'}
+          </p>
         {/if}
       </div>
     </aside>
