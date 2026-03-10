@@ -46,6 +46,8 @@
       <!-- Section header -->
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
+        role="button"
+        tabindex="0"
         class="req-row font-semibold text-gray-700 bg-gray-50 -mx-4 px-4 rounded-sm"
         class:cursor-pointer={!!sectionTags}
         class:hover:bg-blue-50={!!sectionTags}
@@ -76,6 +78,8 @@
           {@const subActive = tagsMatch(activeFilterTags, sub.course_tags)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div
+            role="button"
+            tabindex="0"
             class="req-row pl-6 text-gray-600 cursor-pointer hover:bg-blue-50 rounded-sm"
             class:bg-blue-50={subActive}
             on:click={() => handleSelect(sub.course_tags)}
@@ -118,6 +122,8 @@
           {@const goalActive = tagsMatch(activeFilterTags, goalTags)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div
+            role="button"
+            tabindex="0"
             class="req-row pl-6 text-gray-600 cursor-pointer hover:bg-blue-50 rounded-sm"
             class:bg-blue-50={goalActive}
             on:click={() => handleSelect(goalTags)}
@@ -159,6 +165,8 @@
           {@const bActive = tagsMatch(activeFilterTags, bTags)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div
+            role="button"
+            tabindex="0"
             class="req-row pl-6 text-gray-600 cursor-pointer hover:bg-blue-50 rounded-sm"
             class:bg-blue-50={bActive}
             on:click={() => handleSelect(bTags)}

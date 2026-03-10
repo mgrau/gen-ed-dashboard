@@ -4,7 +4,6 @@
 
   export let semesterLabels
   export let semesters  // writable store: { label: [courses] }
-  export let addToFirstAvailable = null  // optional click-to-place handler
 
   const courseMap = Object.fromEntries(allCourses.courses.map(c => [c.id, c]))
 

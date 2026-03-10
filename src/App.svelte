@@ -97,6 +97,8 @@
   <div class="md:hidden shrink-0 bg-white border-b border-gray-200">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div
+      role="button"
+      tabindex="0"
       class="px-4 py-2 flex items-center justify-between cursor-pointer select-none"
       on:click={() => planOpen = !planOpen}
     >
@@ -138,7 +140,7 @@
 
     <!-- Semester Planner: top half on mobile, center on desktop -->
     <section class="flex-1 min-h-0 overflow-y-auto p-4 border-b md:border-b-0 border-gray-200">
-      <SemesterPlanner {semesterLabels} {semesters} {addToFirstAvailable} />
+      <SemesterPlanner {semesterLabels} {semesters} />
     </section>
 
     <!-- Course Pool: bottom half on mobile, right aside on desktop -->
@@ -156,6 +158,8 @@
           {#if poolSearch}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <span
+              role="button"
+              tabindex="0"
               class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 cursor-pointer text-sm leading-none"
               on:click={() => poolSearch = ''}
             >✕</span>
@@ -166,6 +170,8 @@
             <span class="text-[10px] text-odu-lightblue font-medium">Showing:</span>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <span
+              role="button"
+              tabindex="0"
               class="inline-flex items-center gap-1 text-[10px] bg-blue-50 border border-blue-200 text-blue-700 rounded px-1.5 py-0.5 cursor-pointer hover:bg-blue-100"
               on:click={() => poolFilterTags = null}
             >
@@ -177,7 +183,7 @@
       <div class="grid grid-cols-2 gap-2 p-3 content-start">
         {#each filteredPool as course (course.id)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div on:click={() => addToFirstAvailable(course)}>
+          <div role="button" tabindex="0" on:click={() => addToFirstAvailable(course)}>
             <CourseCard
               {course}
               onDragStart={e => e.dataTransfer.setData('text/plain', course.id)}
