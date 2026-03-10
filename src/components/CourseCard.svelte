@@ -25,15 +25,18 @@
 >
   {#if onRemove}
     <button
-      class="absolute top-1 right-1 text-gray-300 hover:text-red-400 text-xs leading-none opacity-0 group-hover:opacity-100 transition-opacity"
+      class="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-white/60 rounded text-red-400 text-sm"
       on:click={onRemove}
       title="Remove"
       tabindex="-1"
     >✕</button>
   {/if}
 
-  <p class="font-semibold text-odu-blue text-xs">{course.code}</p>
-  <p class="text-gray-600 leading-tight text-xs pr-3">{course.title}</p>
+  <div class="flex items-start justify-between gap-1">
+    <p class="font-semibold text-odu-blue text-xs">{course.code}</p>
+    <span class="text-[10px] text-gray-400 tabular-nums shrink-0">{course.credits} cr</span>
+  </div>
+  <p class="text-gray-600 leading-tight text-xs">{course.title}</p>
 
   <!-- Goal / type tags -->
   {#if visibleTags.length > 0}
@@ -45,8 +48,6 @@
       {/each}
     </div>
   {/if}
-
-  <p class="text-gray-400 text-[10px] mt-1">{course.credits} cr</p>
 
   <!-- Hover tooltip -->
   {#if showTooltip && fulfillable.length > 0}
