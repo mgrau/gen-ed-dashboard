@@ -43,7 +43,7 @@
 
 <div>
   <h2 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">Semester Planner</h2>
-  <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+  <div class="grid grid-cols-2 gap-2 lg:grid-cols-4">
     {#each semesterLabels as label}
       {@const courses = $semesters[label] ?? []}
       {@const credits = courses.reduce((s, c) => s + c.credits, 0)}
