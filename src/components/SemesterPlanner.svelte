@@ -50,6 +50,8 @@
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div
         class="semester-col transition-all"
+        class:bg-red-50={credits > 15 && credits <= 18}
+        class:bg-red-100={credits > 18}
         on:dragover={onDragOver}
         on:dragleave={onDragLeave}
         on:drop={e => onDrop(e, label)}

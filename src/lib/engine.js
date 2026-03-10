@@ -55,15 +55,38 @@ function evaluateFixed(section, placedCourses, usedIds) {
  * Foundational group.
  * Composition: all matching locked.
  * Math: only ONE course locked; extras remain free for Goals.
+ *
+ * Selection rule: when locking a single course, prefer the one with the fewest
+ * tags that contribute to other requirements (goals, breadth). This ensures
+ * multi-tagged courses (e.g. math_foundational + goal_reasoning) are freed up
+ * to satisfy goals, regardless of the order courses were placed.
  */
+
+// Tags that can contribute to sections evaluated after foundational
+const PORTABLE_TAGS = new Set([
+  'goal_inquiry', 'goal_reasoning', 'goal_communication', 'goal_civic',
+  'natural_science_lab', 'arts_humanities', 'social_science'
+])
+
+function portableTagCount(course) {
+  return course.tags.filter(t => PORTABLE_TAGS.has(t)).length
+}
+
 function evaluateFoundational(section, placedCourses, usedIds) {
   const subsections = {}
   for (const sub of section.subsections) {
     const available = placedCourses.filter(c =>
       !usedIds.has(c.id) && c.tags.some(t => sub.course_tags?.includes(t))
     )
-    // Only lock ONE course for math and composition; extras are free for goals/electives
-    const locked = (sub.id === 'math' || sub.id === 'composition') ? available.slice(0, 1) : available
+    // Only lock ONE course for math and composition; extras are free for goals/electives.
+    // Sort so the course with the fewest portable tags is locked first.
+    let locked
+    if (sub.id === 'math' || sub.id === 'composition') {
+      const sorted = available.slice().sort((a, b) => portableTagCount(a) - portableTagCount(b))
+      locked = sorted.slice(0, 1)
+    } else {
+      locked = available
+    }
     locked.forEach(c => usedIds.add(c.id))
     const credits = sumCredits(locked)
     subsections[sub.id] = {

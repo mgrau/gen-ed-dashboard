@@ -31,6 +31,12 @@
 
   let planOpen = false
   let poolSearch = ''
+  let poolFilterTags = null  // set when a requirement row is clicked
+
+  // Label shown in the pool filter chip (first tag's label)
+  $: poolFilterLabel = poolFilterTags
+    ? (TAG_META[poolFilterTags[0]]?.label ?? poolFilterTags[0])
+    : null
 
   function courseMatchesSearch(course, query) {
     const q = query.toLowerCase()
@@ -45,9 +51,16 @@
     })
   }
 
-  $: filteredPool = poolSearch.trim()
-    ? pool.filter(c => courseMatchesSearch(c, poolSearch.trim()))
-    : pool
+  $: filteredPool = (() => {
+    let result = pool
+    if (poolFilterTags) {
+      result = result.filter(c => c.tags.some(t => poolFilterTags.includes(t)))
+    }
+    if (poolSearch.trim()) {
+      result = result.filter(c => courseMatchesSearch(c, poolSearch.trim()))
+    }
+    return result
+  })()
   $: totalSections = activeFramework.sections?.length ?? 0
   $: satisfiedSections = Object.values(evaluation.sections).filter(s => s?.satisfied).length
 
@@ -100,14 +113,24 @@
     </div>
     {#if planOpen}
       <div class="border-t border-gray-100 overflow-y-auto max-h-56">
-        <RequirementsTracker framework={activeFramework} {evaluation} />
+        <RequirementsTracker
+          framework={activeFramework}
+          {evaluation}
+          activeFilterTags={poolFilterTags}
+          onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
+        />
       </div>
     {/if}
   </div>
 
   <!-- Desktop: left aside -->
   <aside class="hidden md:block w-[360px] min-w-[280px] shrink-0 border-r border-gray-200 overflow-y-auto bg-white">
-    <RequirementsTracker framework={activeFramework} {evaluation} />
+    <RequirementsTracker
+      framework={activeFramework}
+      {evaluation}
+      activeFilterTags={poolFilterTags}
+      onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
+    />
   </aside>
 
   <!-- Center + right on desktop / stacked on mobile -->
@@ -138,6 +161,18 @@
             >✕</span>
           {/if}
         </div>
+        {#if poolFilterLabel}
+          <div class="mt-1.5 flex items-center gap-1">
+            <span class="text-[10px] text-odu-lightblue font-medium">Showing:</span>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <span
+              class="inline-flex items-center gap-1 text-[10px] bg-blue-50 border border-blue-200 text-blue-700 rounded px-1.5 py-0.5 cursor-pointer hover:bg-blue-100"
+              on:click={() => poolFilterTags = null}
+            >
+              {poolFilterLabel} <span class="text-blue-400">✕</span>
+            </span>
+          </div>
+        {/if}
       </div>
       <div class="grid grid-cols-2 gap-2 p-3 content-start">
         {#each filteredPool as course (course.id)}

@@ -1,13 +1,26 @@
 <script>
   export let framework
   export let evaluation
+  export let activeFilterTags = null
+  export let onSelectTags = () => {}
 
   function statusIcon(satisfied) {
     return satisfied ? '✓' : '○'
   }
 
-  function creditLabel(fulfilled, required) {
-    return `${fulfilled}/${required} cr`
+  function tagsMatch(a, b) {
+    if (!a || !b || a.length !== b.length) return false
+    const as = [...a].sort(), bs = [...b].sort()
+    return as.every((t, i) => t === bs[i])
+  }
+
+  function handleSelect(tags) {
+    if (!tags?.length) return
+    onSelectTags(tagsMatch(activeFilterTags, tags) ? null : tags)
+  }
+
+  function pct(fulfilled, required) {
+    return Math.min(100, required > 0 ? (fulfilled / required) * 100 : 0)
   }
 </script>
 
@@ -26,33 +39,62 @@
 
   {#each framework.sections as section}
     {@const result = evaluation.sections[section.id]}
+    {@const sectionTags = section.course_tags ?? null}
+    {@const sectionActive = tagsMatch(activeFilterTags, sectionTags)}
     <div class="mb-4">
+
       <!-- Section header -->
-      <div class="req-row font-semibold text-gray-700 bg-gray-50 -mx-4 px-4">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div
+        class="req-row font-semibold text-gray-700 bg-gray-50 -mx-4 px-4 rounded-sm"
+        class:cursor-pointer={!!sectionTags}
+        class:hover:bg-blue-50={!!sectionTags}
+        class:bg-blue-50={sectionActive}
+        on:click={() => handleSelect(sectionTags)}
+      >
         <span class={result?.satisfied ? 'req-satisfied' : 'req-incomplete'}>
           {statusIcon(result?.satisfied)}
         </span>
         <span class="flex-1">{section.label}</span>
-        <span class="text-xs text-gray-400 tabular-nums">
-          {creditLabel(result?.creditsFulfilled ?? 0, section.credits_required)}
-        </span>
+        <!-- Progress bar + credits -->
+        <div class="flex items-center gap-1.5 shrink-0">
+          <div class="w-12 h-1 rounded-full bg-gray-200 overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all {result?.satisfied ? 'bg-green-400' : 'bg-red-300'}"
+              style="width: {pct(result?.creditsFulfilled ?? 0, section.credits_required)}%"
+            ></div>
+          </div>
+          <span class="text-xs tabular-nums {result?.satisfied ? 'text-gray-400' : 'text-red-400'}">
+            {result?.creditsFulfilled ?? 0}/{section.credits_required} cr
+          </span>
+        </div>
       </div>
 
       {#if section.type === 'group' && result?.subsections}
         {#each section.subsections as sub}
           {@const subResult = result.subsections[sub.id]}
-          <div class="req-row pl-6 text-gray-600">
+          {@const subActive = tagsMatch(activeFilterTags, sub.course_tags)}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div
+            class="req-row pl-6 text-gray-600 cursor-pointer hover:bg-blue-50 rounded-sm"
+            class:bg-blue-50={subActive}
+            on:click={() => handleSelect(sub.course_tags)}
+          >
             <span class={subResult?.satisfied ? 'req-satisfied' : 'req-incomplete'}>
               {statusIcon(subResult?.satisfied)}
             </span>
             <span class="flex-1">{sub.label}</span>
-            {#if subResult?.satisfied}
-              <span class="text-xs text-gray-400 tabular-nums">
-                {creditLabel(subResult.creditsFulfilled, sub.credits_required)}
+            <div class="flex items-center gap-1.5 shrink-0">
+              <div class="w-10 h-1 rounded-full bg-gray-200 overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all {subResult?.satisfied ? 'bg-green-400' : 'bg-red-300'}"
+                  style="width: {pct(subResult?.creditsFulfilled ?? 0, sub.credits_required)}%"
+                ></div>
+              </div>
+              <span class="text-xs tabular-nums {subResult?.satisfied ? 'text-gray-400' : 'text-red-400'}">
+                {subResult?.creditsFulfilled ?? 0}/{sub.credits_required} cr
               </span>
-            {:else}
-              <span class="text-xs text-red-400 italic">Still needed</span>
-            {/if}
+            </div>
           </div>
           {#each subResult?.courses ?? [] as course}
             <div class="req-row pl-10 text-gray-500 text-xs">
@@ -65,25 +107,36 @@
         {/each}
 
       {:else if section.type === 'goals' && result?.goals}
-        <!-- Goals -->
+        <!-- Goals note -->
         <div class="req-row pl-4 text-xs text-gray-500 italic">
           <span class="w-3"></span>
           <span>{section.note}</span>
         </div>
         {#each framework.sections.find(s => s.id === section.id).goals as goal}
           {@const goalResult = result.goals[goal.id]}
-          <div class="req-row pl-6 text-gray-600">
+          {@const goalTags = [goal.tag]}
+          {@const goalActive = tagsMatch(activeFilterTags, goalTags)}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div
+            class="req-row pl-6 text-gray-600 cursor-pointer hover:bg-blue-50 rounded-sm"
+            class:bg-blue-50={goalActive}
+            on:click={() => handleSelect(goalTags)}
+          >
             <span class={goalResult?.satisfied ? 'req-satisfied' : 'req-incomplete'}>
               {statusIcon(goalResult?.satisfied)}
             </span>
             <span class="flex-1">{goal.label}</span>
-            {#if goalResult?.satisfied}
-              <span class="text-xs text-gray-400 tabular-nums">
-                {creditLabel(goalResult.creditsFulfilled, goal.credits_required)}
+            <div class="flex items-center gap-1.5 shrink-0">
+              <div class="w-10 h-1 rounded-full bg-gray-200 overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all {goalResult?.satisfied ? 'bg-green-400' : 'bg-red-300'}"
+                  style="width: {pct(goalResult?.creditsFulfilled ?? 0, goal.credits_required)}%"
+                ></div>
+              </div>
+              <span class="text-xs tabular-nums {goalResult?.satisfied ? 'text-gray-400' : 'text-red-400'}">
+                {goalResult?.creditsFulfilled ?? 0}/{goal.credits_required} cr
               </span>
-            {:else}
-              <span class="text-xs text-red-400 italic">Still needed</span>
-            {/if}
+            </div>
           </div>
           {#each goalResult?.courses ?? [] as course}
             <div class="req-row pl-10 text-gray-500 text-xs">
@@ -102,18 +155,29 @@
         </div>
         {#each framework.sections.find(s => s.id === section.id).breadth as b}
           {@const bResult = result.breadth[b.id]}
-          <div class="req-row pl-6 text-gray-600">
+          {@const bTags = [b.tag]}
+          {@const bActive = tagsMatch(activeFilterTags, bTags)}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div
+            class="req-row pl-6 text-gray-600 cursor-pointer hover:bg-blue-50 rounded-sm"
+            class:bg-blue-50={bActive}
+            on:click={() => handleSelect(bTags)}
+          >
             <span class={bResult?.satisfied ? 'req-satisfied' : 'req-incomplete'}>
               {statusIcon(bResult?.satisfied)}
             </span>
             <span class="flex-1">{b.label}</span>
-            {#if bResult?.satisfied}
-              <span class="text-xs text-gray-400 tabular-nums">
-                {creditLabel(bResult.creditsFulfilled, b.credits_required)}
+            <div class="flex items-center gap-1.5 shrink-0">
+              <div class="w-10 h-1 rounded-full bg-gray-200 overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all {bResult?.satisfied ? 'bg-green-400' : 'bg-red-300'}"
+                  style="width: {pct(bResult?.creditsFulfilled ?? 0, b.credits_required)}%"
+                ></div>
+              </div>
+              <span class="text-xs tabular-nums {bResult?.satisfied ? 'text-gray-400' : 'text-red-400'}">
+                {bResult?.creditsFulfilled ?? 0}/{b.credits_required} cr
               </span>
-            {:else}
-              <span class="text-xs text-red-400 italic">Still needed</span>
-            {/if}
+            </div>
           </div>
           {#each bResult?.courses ?? [] as course}
             <div class="req-row pl-10 text-gray-500 text-xs">
@@ -135,12 +199,6 @@
             <span class="tabular-nums text-gray-400">{course.credits} cr</span>
           </div>
         {/each}
-        {#if !(result?.satisfied)}
-          <div class="req-row pl-6 text-xs text-red-400 italic">
-            <span class="w-3"></span>
-            <span>Still needed: {section.credits_required - (result?.creditsFulfilled ?? 0)} more credits</span>
-          </div>
-        {/if}
         {#if section.note}
           <div class="req-row pl-6 text-xs text-gray-400 italic">
             <span class="w-3"></span>
@@ -148,6 +206,7 @@
           </div>
         {/if}
       {/if}
+
     </div>
   {/each}
 </div>
