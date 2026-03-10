@@ -6,14 +6,30 @@
 # Foundational/special tags (exclusive to their section):
 #   fys | composition | math_foundational | gened_capstone
 #
-# Double-goal courses (2 goal tags): ENGL211C, HIST103H, SOC203S, COMM260, PHIL160R
-# That is 5 / 61 total = ~8%, well under the 20% target.
 
 courses:
   # ── First Year Seminar ─────────────────────────────────────────────────────
   - id: UNIV100
     code: "UNIV 100"
     title: "First Year Seminar"
+    credits: 3
+    tags: [fys]
+
+  - id: BIOL100
+    code: "BIOL 100"
+    title: "First Year Seminar: Exploring Life Sciences"
+    credits: 3
+    tags: [fys]
+
+  - id: ENGR100
+    code: "ENGR 100"
+    title: "First Year Seminar: Engineering Your World"
+    credits: 3
+    tags: [fys]
+
+  - id: ENGL100
+    code: "ENGL 100"
+    title: "First Year Seminar: Stories That Shape Us"
     credits: 3
     tags: [fys]
 
@@ -47,7 +63,7 @@ courses:
     code: "MATH 162M"
     title: "Precalculus I"
     credits: 3
-    tags: [math_foundational]
+    tags: [math_foundational, goal_reasoning]
 
   - id: MATH200
     code: "MATH 200"
@@ -121,7 +137,7 @@ courses:
     code: "ARTS 231"
     title: "Drawing I: Fundamentals of Drawing"
     credits: 3
-    tags: [arts_humanities]
+    tags: [arts_humanities, goal_reasoning]
 
   - id: MUSC121
     code: "MUSC 121"
@@ -163,7 +179,7 @@ courses:
     code: "PHIL 150P"
     title: "Life, Death, and Meaning"
     credits: 3
-    tags: [arts_humanities]
+    tags: [arts_humanities, goal_reasoning]
 
   - id: PHIL155E
     code: "PHIL 155E"
@@ -187,7 +203,7 @@ courses:
     code: "HIST 102H"
     title: "Interpreting the European Past"
     credits: 3
-    tags: [arts_humanities]
+    tags: [arts_humanities, goal_civic]
 
   - id: HIST103H
     code: "HIST 103H"
@@ -212,6 +228,18 @@ courses:
     title: "Introduction to African American Studies"
     credits: 3
     tags: [arts_humanities, goal_civic]
+
+  - id: DANC110A
+    code: "DANC 110A"
+    title: "Dance Appreciation"
+    credits: 3
+    tags: [arts_humanities, goal_communication]
+
+  - id: DANC210A
+    code: "DANC 210A"
+    title: "Choreography and Composition"
+    credits: 3
+    tags: [arts_humanities, goal_reasoning]
 
   # ── Behavioral & Social Science ────────────────────────────────────────────
   - id: PSYC201S
@@ -292,6 +320,30 @@ courses:
     credits: 3
     tags: [social_science, goal_civic]
 
+  - id: CRJS101S
+    code: "CRJS 101S"
+    title: "Introduction to Criminal Justice"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: HLTH200S
+    code: "HLTH 200S"
+    title: "Public Health and Society"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: ENVR101S
+    code: "ENVR 101S"
+    title: "Environment, Society, and Policy"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: INTL150S
+    code: "INTL 150S"
+    title: "Introduction to Global Studies"
+    credits: 3
+    tags: [social_science, goal_civic]
+
   # ── Goal-tagged courses (no breadth category) ─────────────────────────────
   - id: COMM101R
     code: "COMM 101R"
@@ -316,6 +368,30 @@ courses:
     title: "Understanding Media"
     credits: 3
     tags: [goal_communication, goal_civic]                  # double-goal (4 of 5)
+
+  - id: BSAD105R
+    code: "BSAD 105R"
+    title: "Business Communication and Presentation"
+    credits: 3
+    tags: [goal_communication]
+
+  - id: JOUR101R
+    code: "JOUR 101R"
+    title: "Introduction to Journalism"
+    credits: 3
+    tags: [goal_communication]
+
+  - id: COMM251R
+    code: "COMM 251R"
+    title: "Science Communication"
+    credits: 3
+    tags: [goal_communication, goal_inquiry]                # double-goal: translating research for public audiences
+
+  - id: PHIL225E
+    code: "PHIL 225E"
+    title: "Ethics, Technology, and Society"
+    credits: 3
+    tags: [arts_humanities, goal_civic]
 
   - id: COMM272G
     code: "COMM 272G"
