@@ -1,0 +1,72 @@
+id: framework-a
+name: "Proposed Framework 2/3"
+description: "ODU's proposed general education framework with goal-based distribution requirements."
+
+sections:
+  - id: first_year_seminar
+    label: "First Year Seminar"
+    credits_required: 3
+    type: fixed
+    course_tags: [fys]
+
+  - id: foundational
+    label: "Foundational Requirements"
+    credits_required: 6
+    type: group
+    subsections:
+      - id: composition
+        label: "Composition"
+        credits_required: 3
+        course_tags: [composition]
+      - id: math
+        label: "Mathematics"
+        credits_required: 3
+        course_tags: [math_foundational]
+
+  - id: goals
+    label: "General Education Goals"
+    credits_required: 19
+    type: goals
+    note: "At least 3 credits in each goal. Double-tagged courses count for one goal only."
+    goals:
+      - id: inquiry
+        label: "Inquiry & Research"
+        credits_required: 3
+        tag: goal_inquiry
+      - id: reasoning
+        label: "Reasoning & Problem Solving"
+        credits_required: 3
+        tag: goal_reasoning
+      - id: communication
+        label: "Communication & Expression"
+        credits_required: 3
+        tag: goal_communication
+      - id: civic
+        label: "Civic Engagement & Social Responsibility"
+        credits_required: 3
+        tag: goal_civic
+    breadth:
+      - id: natural_science
+        label: "Natural Science (with Lab)"
+        credits_required: 4
+        tag: natural_science_lab
+      - id: arts_humanities
+        label: "Fine Arts or Humanities"
+        credits_required: 3
+        tag: arts_humanities
+      - id: social_science
+        label: "Behavioral or Social Science"
+        credits_required: 3
+        tag: social_science
+
+  - id: capstone
+    label: "General Education Capstone"
+    credits_required: 1
+    type: fixed
+    course_tags: [gened_capstone]
+
+  - id: exploratory
+    label: "Exploratory Electives"
+    credits_required: 6
+    type: elective
+    note: "Any courses outside the student's major."

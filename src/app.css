@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-800 font-sans;
+  }
+}
+
+@layer components {
+  .req-row {
+    @apply flex items-start gap-2 py-1.5 text-sm border-b border-gray-100 last:border-0;
+  }
+  .req-satisfied {
+    @apply text-green-600;
+  }
+  .req-incomplete {
+    @apply text-red-500;
+  }
+  .course-card {
+    @apply bg-white border border-gray-200 rounded shadow-sm p-2 text-xs cursor-grab active:cursor-grabbing select-none;
+  }
+  .semester-col {
+    @apply bg-white border border-gray-200 rounded-lg p-3 min-h-[180px] flex flex-col gap-2;
+  }
+}

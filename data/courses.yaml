@@ -1,0 +1,361 @@
+# ODU courses tagged for Framework A
+# Goal tags (a course may carry at most 2):
+#   goal_inquiry | goal_reasoning | goal_communication | goal_civic
+# Breadth tags (independent of goals):
+#   natural_science_lab | arts_humanities | social_science
+# Foundational/special tags (exclusive to their section):
+#   fys | composition | math_foundational | gened_capstone
+#
+# Double-goal courses (2 goal tags): ENGL211C, HIST103H, SOC203S, COMM260, PHIL160R
+# That is 5 / 61 total = ~8%, well under the 20% target.
+
+courses:
+  # ── First Year Seminar ─────────────────────────────────────────────────────
+  - id: UNIV100
+    code: "UNIV 100"
+    title: "First Year Seminar"
+    credits: 3
+    tags: [fys]
+
+  # ── Composition ────────────────────────────────────────────────────────────
+  - id: ENGL110C
+    code: "ENGL 110C"
+    title: "English Composition"
+    credits: 3
+    tags: [composition, goal_communication]
+
+  - id: ENGL211C
+    code: "ENGL 211C"
+    title: "Writing, Rhetoric, and Research"
+    credits: 3
+    tags: [composition, goal_inquiry, goal_communication]   # double-goal (1 of 5)
+
+  # ── Foundational Math ──────────────────────────────────────────────────────
+  - id: MATH101M
+    code: "MATH 101M"
+    title: "Mathematics for Critical Thinking"
+    credits: 3
+    tags: [math_foundational, goal_reasoning]
+
+  - id: MATH102M
+    code: "MATH 102M"
+    title: "College Algebra"
+    credits: 3
+    tags: [math_foundational, goal_reasoning]
+
+  - id: MATH162M
+    code: "MATH 162M"
+    title: "Precalculus I"
+    credits: 3
+    tags: [math_foundational]
+
+  - id: MATH200
+    code: "MATH 200"
+    title: "Calculus for Business and Economics"
+    credits: 3
+    tags: [math_foundational, goal_reasoning]
+
+  - id: STAT130M
+    code: "STAT 130M"
+    title: "Elementary Statistics"
+    credits: 3
+    tags: [math_foundational, goal_reasoning]
+
+  # ── Natural Science with Lab ───────────────────────────────────────────────
+  - id: BIOL105N
+    code: "BIOL 105N"
+    title: "Biology for Nonscience Majors I"
+    credits: 4
+    tags: [natural_science_lab, goal_inquiry]
+
+  - id: BIOL106N
+    code: "BIOL 106N"
+    title: "Biology for Nonscience Majors II"
+    credits: 4
+    tags: [natural_science_lab, goal_inquiry]
+
+  - id: BIOL121N
+    code: "BIOL 121N"
+    title: "General Biology I (with Lab)"
+    credits: 4
+    tags: [natural_science_lab, goal_inquiry]
+
+  - id: CHEM105N
+    code: "CHEM 105N"
+    title: "Introductory Chemistry (with Lab)"
+    credits: 4
+    tags: [natural_science_lab, goal_reasoning]
+
+  - id: CHEM121N
+    code: "CHEM 121N"
+    title: "Foundations of Chemistry I (with Lab)"
+    credits: 4
+    tags: [natural_science_lab, goal_reasoning]
+
+  - id: PHYS101N
+    code: "PHYS 101N"
+    title: "Conceptual Physics I"
+    credits: 4
+    tags: [natural_science_lab, goal_reasoning]
+
+  - id: PHYS102N
+    code: "PHYS 102N"
+    title: "Conceptual Physics II"
+    credits: 4
+    tags: [natural_science_lab, goal_reasoning]
+
+  - id: PHYS111N
+    code: "PHYS 111N"
+    title: "Introductory General Physics I"
+    credits: 4
+    tags: [natural_science_lab, goal_reasoning]
+
+  # ── Fine Arts & Humanities ─────────────────────────────────────────────────
+  - id: ARTS122A
+    code: "ARTS 122A"
+    title: "Visual Communication"
+    credits: 3
+    tags: [arts_humanities, goal_communication]
+
+  - id: ARTS231
+    code: "ARTS 231"
+    title: "Drawing I: Fundamentals of Drawing"
+    credits: 3
+    tags: [arts_humanities]
+
+  - id: MUSC121
+    code: "MUSC 121"
+    title: "Music Appreciation"
+    credits: 3
+    tags: [arts_humanities]
+
+  - id: THEA101
+    code: "THEA 101"
+    title: "Introduction to Theatre"
+    credits: 3
+    tags: [arts_humanities, goal_communication]
+
+  - id: ENGL112L
+    code: "ENGL 112L"
+    title: "Introduction to Literature"
+    credits: 3
+    tags: [arts_humanities, goal_communication]
+
+  - id: ENGL114L
+    code: "ENGL 114L"
+    title: "American Writers, American Experiences"
+    credits: 3
+    tags: [arts_humanities, goal_communication]
+
+  - id: ENGL215L
+    code: "ENGL 215L"
+    title: "Deep Dive Literature"
+    credits: 3
+    tags: [arts_humanities, goal_inquiry]
+
+  - id: PHIL110P
+    code: "PHIL 110P"
+    title: "Introduction to Philosophy"
+    credits: 3
+    tags: [arts_humanities, goal_reasoning]
+
+  - id: PHIL150P
+    code: "PHIL 150P"
+    title: "Life, Death, and Meaning"
+    credits: 3
+    tags: [arts_humanities]
+
+  - id: PHIL155E
+    code: "PHIL 155E"
+    title: "Human Nature"
+    credits: 3
+    tags: [arts_humanities, goal_inquiry]
+
+  - id: HIST100H
+    code: "HIST 100H"
+    title: "Interpreting the World Past Since 1500"
+    credits: 3
+    tags: [arts_humanities, goal_civic]
+
+  - id: HIST101H
+    code: "HIST 101H"
+    title: "Interpreting the Asian Past"
+    credits: 3
+    tags: [arts_humanities, goal_civic]
+
+  - id: HIST102H
+    code: "HIST 102H"
+    title: "Interpreting the European Past"
+    credits: 3
+    tags: [arts_humanities]
+
+  - id: HIST103H
+    code: "HIST 103H"
+    title: "Interpreting the Latin American Past"
+    credits: 3
+    tags: [arts_humanities, goal_civic, goal_inquiry]       # double-goal (2 of 5)
+
+  - id: HIST104H
+    code: "HIST 104H"
+    title: "Interpreting the American Past"
+    credits: 3
+    tags: [arts_humanities, goal_civic]
+
+  - id: HIST105H
+    code: "HIST 105H"
+    title: "Interpreting the African Past"
+    credits: 3
+    tags: [arts_humanities, goal_civic]
+
+  - id: AFAM201
+    code: "AFAM 201"
+    title: "Introduction to African American Studies"
+    credits: 3
+    tags: [arts_humanities, goal_civic]
+
+  # ── Behavioral & Social Science ────────────────────────────────────────────
+  - id: PSYC201S
+    code: "PSYC 201S"
+    title: "Introduction to Psychology"
+    credits: 3
+    tags: [social_science, goal_inquiry]
+
+  - id: PSYC203S
+    code: "PSYC 203S"
+    title: "Lifespan Development"
+    credits: 3
+    tags: [social_science, goal_inquiry]
+
+  - id: SOC201S
+    code: "SOC 201S"
+    title: "Introduction to Sociology"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: SOC100S
+    code: "SOC 100S"
+    title: "Leadership and Society"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: SOC203S
+    code: "SOC 203S"
+    title: "Diversity and Society"
+    credits: 3
+    tags: [social_science, goal_civic, goal_inquiry]        # double-goal (3 of 5)
+
+  - id: SOC205S
+    code: "SOC 205S"
+    title: "Data, Technology, and Society"
+    credits: 3
+    tags: [social_science, goal_reasoning]
+
+  - id: POLS101S
+    code: "POLS 101S"
+    title: "Introduction to American Politics"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: POLS100S
+    code: "POLS 100S"
+    title: "Introduction to International Politics"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: POLS102S
+    code: "POLS 102S"
+    title: "Introduction to Comparative Government"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: ECON101S
+    code: "ECON 101S"
+    title: "Introduction to Economics"
+    credits: 3
+    tags: [social_science, goal_reasoning]
+
+  - id: ANTH101S
+    code: "ANTH 101S"
+    title: "Introduction to Anthropology"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: GEOG101S
+    code: "GEOG 101S"
+    title: "Human Geography"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  - id: WGS201S
+    code: "WGS 201S"
+    title: "Introduction to Women's and Gender Studies"
+    credits: 3
+    tags: [social_science, goal_civic]
+
+  # ── Goal-tagged courses (no breadth category) ─────────────────────────────
+  - id: COMM101R
+    code: "COMM 101R"
+    title: "Public Speaking"
+    credits: 3
+    tags: [goal_communication]
+
+  - id: COMM112R
+    code: "COMM 112R"
+    title: "Introduction to Interpersonal Communication"
+    credits: 3
+    tags: [goal_communication]
+
+  - id: COMM200S
+    code: "COMM 200S"
+    title: "Introduction to Human Communication"
+    credits: 3
+    tags: [goal_communication]
+
+  - id: COMM260
+    code: "COMM 260"
+    title: "Understanding Media"
+    credits: 3
+    tags: [goal_communication, goal_civic]                  # double-goal (4 of 5)
+
+  - id: COMM272G
+    code: "COMM 272G"
+    title: "Digital Literacy"
+    credits: 3
+    tags: [goal_reasoning]
+
+  - id: PHIL120P
+    code: "PHIL 120P"
+    title: "Logic and Philosophy"
+    credits: 3
+    tags: [goal_reasoning]
+
+  - id: PHIL160R
+    code: "PHIL 160R"
+    title: "Raising Moral Issues in STEM"
+    credits: 3
+    tags: [goal_reasoning, goal_civic]                      # double-goal (5 of 5)
+
+  - id: PHYS137T
+    code: "PHYS 137T"
+    title: "Introduction to Quantum Science and Technology"
+    credits: 3
+    tags: [goal_reasoning]
+
+  - id: CHEM171T
+    code: "CHEM 171T"
+    title: "Influence of Polymers on Society"
+    credits: 3
+    tags: [goal_inquiry]
+
+  - id: BIOL110N
+    code: "BIOL 110N"
+    title: "Environmental Science for Non-Majors"
+    credits: 3
+    tags: [goal_inquiry]
+
+  # ── Gen Ed Capstone ────────────────────────────────────────────────────────
+  - id: UNIV400
+    code: "UNIV 400"
+    title: "General Education Capstone"
+    credits: 1
+    tags: [gened_capstone]
