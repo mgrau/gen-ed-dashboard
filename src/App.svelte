@@ -10,6 +10,7 @@
   import CourseCard from './components/CourseCard.svelte'
   import { evaluate } from './lib/engine.js'
   import { TAG_META } from './lib/tags.js'
+  import CreditSummaryBar from './components/CreditSummaryBar.svelte'
 
   const baseFrameworks = [frameworkA, frameworkB]
   let activeFrameworkIndex = 0
@@ -104,6 +105,8 @@
   bind:activeIndex={activeFrameworkIndex}
   bind:editMode
 />
+
+<CreditSummaryBar framework={activeFramework} {evaluation} {placedCourses} />
 
 <main class="flex flex-col md:flex-row overflow-hidden" style="height: calc(100vh - 96px)">
 
