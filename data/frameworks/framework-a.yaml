@@ -1,6 +1,6 @@
 id: framework-a
-name: "Proposed Framework 2/3"
-description: "ODU's proposed general education framework with goal-based distribution requirements."
+name: "Framework 2/3"
+description: "Proposed general education framework with goal-based distribution requirements."
 
 sections:
   - id: first_year_seminar

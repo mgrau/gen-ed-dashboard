@@ -1,6 +1,6 @@
 id: framework-b
-name: "Proposed Framework 4"
-description: "An alternative general education framework with a fixed exploratory core and separate learning goal requirements."
+name: "Framework 4"
+description: "Proposed general education framework with a fixed exploratory core and separate learning goal requirements."
 
 sections:
   - id: first_year_seminar
