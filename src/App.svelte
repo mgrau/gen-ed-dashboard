@@ -40,6 +40,26 @@
   $: pool = allCourses.courses.filter(c => !placedIds.has(c.id))
   $: evaluation = evaluate(activeFramework, placedCourses)
 
+  /** Map courseId → the label of its assigned leaf section. */
+  function buildAssignmentMap(sections, evalSections) {
+    const map = {}
+    function walk(sections, evalSecs) {
+      for (const s of sections) {
+        if (s.overlay || s.elective) continue
+        const result = evalSecs?.[s.id]
+        if (!result) continue
+        if (result.subcategories && s.subcategories) {
+          walk(s.subcategories, result.subcategories)
+        } else if (result.courses) {
+          for (const c of result.courses) map[c.id] = s.label
+        }
+      }
+    }
+    walk(sections, evalSections)
+    return map
+  }
+  $: courseAssignment = buildAssignmentMap(activeFramework.sections, evaluation.sections)
+
   let planOpen = false
   let poolSearch = ''
   let poolFilterTags = null  // set when a requirement row is clicked
@@ -173,7 +193,7 @@
 
     <!-- Semester Planner: top half on mobile, center on desktop -->
     <section class="@container flex-1 min-h-0 overflow-y-auto p-4 border-b md:border-b-0 border-gray-200">
-      <SemesterPlanner {semesterLabels} {semesters} />
+      <SemesterPlanner {semesterLabels} {semesters} {courseAssignment} />
     </section>
 
     <!-- Course Pool: bottom half on mobile, right aside on desktop -->

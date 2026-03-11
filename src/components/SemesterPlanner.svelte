@@ -4,6 +4,7 @@
 
   export let semesterLabels
   export let semesters  // writable store: { label: [courses] }
+  export let courseAssignment = {}  // courseId → assigned section label
 
   const courseMap = Object.fromEntries(allCourses.courses.map(c => [c.id, c]))
 
@@ -65,6 +66,7 @@
           <div on:click={() => removeCourse(label, course.id)}>
             <CourseCard
               {course}
+              assignedTo={courseAssignment[course.id]}
               onDragStart={e => e.dataTransfer.setData('text/plain', course.id)}
             />
           </div>

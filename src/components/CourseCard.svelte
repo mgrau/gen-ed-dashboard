@@ -4,6 +4,7 @@
   export let course
   export let onDragStart = null
   export let onRemove = null   // if set, show remove button
+  export let assignedTo = null  // label of the requirement this course satisfies
 
   let showTooltip = false
 
@@ -37,6 +38,11 @@
     <span class="text-[10px] text-gray-400 tabular-nums shrink-0">{course.credits} cr</span>
   </div>
   <p class="text-gray-600 leading-tight text-xs">{course.title}</p>
+
+  <!-- Assignment label -->
+  {#if assignedTo}
+    <p class="text-[10px] text-gray-400 mt-1 truncate" title={assignedTo}>→ {assignedTo}</p>
+  {/if}
 
   <!-- Goal / type tags -->
   {#if visibleTags.length > 0}
