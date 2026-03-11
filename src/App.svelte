@@ -60,6 +60,27 @@
   }
   $: courseAssignment = buildAssignmentMap(activeFramework.sections, evaluation.sections)
 
+  /** Return the labels of every leaf section (incl. overlays) a course is eligible for. */
+  function getEligibleSections(course, framework) {
+    const result = []
+    function walk(sections) {
+      for (const s of sections) {
+        if (s.elective) continue
+        if (s.subcategories?.length) {
+          walk(s.subcategories)
+        } else if (!s.tags?.length || course.tags.some(t => s.tags.includes(t))) {
+          result.push(s.label)
+        }
+      }
+    }
+    walk(framework.sections)
+    return result
+  }
+
+  $: poolEligibility = Object.fromEntries(
+    pool.map(c => [c.id, getEligibleSections(c, activeFramework)])
+  )
+
   let planOpen = false
   let poolSearch = ''
   let poolFilterTags = null  // set when a requirement row is clicked
@@ -239,6 +260,7 @@
           <div role="button" tabindex="0" on:click={() => addToFirstAvailable(course)}>
             <CourseCard
               {course}
+              eligibleFor={poolEligibility[course.id]}
               onDragStart={e => e.dataTransfer.setData('text/plain', course.id)}
             />
           </div>

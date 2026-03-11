@@ -4,12 +4,13 @@
   export let course
   export let onDragStart = null
   export let onRemove = null   // if set, show remove button
-  export let assignedTo = null  // label of the requirement this course satisfies
+  export let assignedTo = null   // label of the requirement this course satisfies (planner)
+  export let eligibleFor = null  // framework-aware list of sections this course can fill (pool)
 
   let showTooltip = false
 
   $: visibleTags = course.tags.filter(t => TAG_META[t])
-  $: fulfillable = fulfillableLabels(course)
+  $: tooltipItems = eligibleFor ?? fulfillableLabels(course)
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -56,13 +57,13 @@
   {/if}
 
   <!-- Hover tooltip -->
-  {#if showTooltip && fulfillable.length > 0}
+  {#if showTooltip && tooltipItems.length > 0}
     <div class="absolute z-50 bottom-full left-0 mb-1 w-56 bg-white border border-gray-200 rounded shadow-lg p-2 text-xs pointer-events-none">
       <p class="font-semibold text-gray-700 mb-1">{course.code} — {course.title}</p>
       <p class="text-gray-500 mb-1">{course.credits} credits</p>
-      <p class="font-medium text-gray-600">Can fulfill:</p>
+      <p class="font-medium text-gray-600">{eligibleFor ? 'Can satisfy:' : 'Can fulfill:'}</p>
       <ul class="mt-0.5 space-y-0.5">
-        {#each fulfillable as label}
+        {#each tooltipItems as label}
           <li class="text-gray-500">• {label}</li>
         {/each}
       </ul>
