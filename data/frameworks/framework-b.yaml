@@ -1,0 +1,68 @@
+id: framework-b
+name: "Proposed Framework 4"
+description: "An alternative general education framework with a fixed exploratory core and separate learning goal requirements."
+
+sections:
+  - id: first_year_seminar
+    label: "First Year Seminar"
+    tags: [fys]
+    credits: 3
+
+  - id: foundational
+    label: "Foundational Requirements"
+    subcategories:
+      - id: composition
+        label: "Composition"
+        tags: [composition]
+        credits: 3
+
+  - id: exploratory_core
+    label: "Exploratory Core"
+    min_credits: 9
+    note: "One course in each of three disciplinary areas. Science/Math and Goal requirements are satisfied independently."
+    subcategories:
+      - id: science_math
+        label: "Science or Mathematics"
+        tags: [natural_science, math_foundational]
+        min_credits: 3
+      - id: arts_humanities
+        label: "Arts or Humanities"
+        tags: [arts, humanities]
+        min_credits: 3
+      - id: social_science
+        label: "Behavioral or Social Science"
+        tags: [social_science]
+        min_credits: 3
+
+  - id: goals
+    label: "General Education Goals"
+    min_credits: 12
+    note: "At least 3 credits in each learning goal."
+    subcategories:
+      - id: inquiry
+        label: "Inquiry & Research"
+        tags: [goal_inquiry]
+        min_credits: 3
+      - id: reasoning
+        label: "Reasoning & Problem Solving"
+        tags: [goal_reasoning]
+        min_credits: 3
+      - id: communication
+        label: "Communication & Expression"
+        tags: [goal_communication]
+        min_credits: 3
+      - id: civic
+        label: "Civic Engagement & Social Responsibility"
+        tags: [goal_civic]
+        min_credits: 3
+
+  - id: capstone
+    label: "General Education Capstone"
+    tags: [gened_capstone]
+    credits: 1
+
+  - id: exploratory
+    label: "Exploratory Electives"
+    min_credits: 6
+    elective: true
+    note: "Any courses outside the student's major."

@@ -1,6 +1,7 @@
 <script>
   import { writable } from 'svelte/store'
   import frameworkA from '../data/frameworks/framework-a.yaml'
+  import frameworkB from '../data/frameworks/framework-b.yaml'
   import allCourses from '../data/courses.yaml'
   import FrameworkTabs from './components/FrameworkTabs.svelte'
   import RequirementsTracker from './components/RequirementsTracker.svelte'
@@ -10,7 +11,7 @@
   import { evaluate } from './lib/engine.js'
   import { TAG_META } from './lib/tags.js'
 
-  const baseFrameworks = [frameworkA]
+  const baseFrameworks = [frameworkA, frameworkB]
   let activeFrameworkIndex = 0
   let editMode = false
 
