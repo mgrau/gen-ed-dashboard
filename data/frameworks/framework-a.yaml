@@ -55,8 +55,8 @@ sections:
             min_credits: 4
             min_courses: 1
           - id: arts_humanities
-            label: "Fine Arts or Humanities"
-            tags: [arts_humanities]
+            label: "Arts or Humanities"
+            tags: [arts, humanities]
             min_credits: 3
             min_courses: 1
           - id: social_science

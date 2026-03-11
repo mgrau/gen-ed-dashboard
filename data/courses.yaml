@@ -2,7 +2,7 @@
 # Goal tags (a course may carry at most 2):
 #   goal_inquiry | goal_reasoning | goal_communication | goal_civic
 # Breadth tags (independent of goals):
-#   natural_science | arts_humanities | social_science
+#   natural_science | arts | humanities | social_science
 # Foundational/special tags (exclusive to their section):
 #   fys | composition | math_foundational | gened_capstone
 #
@@ -126,120 +126,121 @@ courses:
     credits: 4
     tags: [natural_science, goal_reasoning]
 
-  # ── Fine Arts & Humanities ─────────────────────────────────────────────────
+  # ── Fine Arts ──────────────────────────────────────────────────────────────
   - id: ARTS122A
     code: "ARTS 122A"
     title: "Visual Communication"
     credits: 3
-    tags: [arts_humanities, goal_communication]
+    tags: [arts, goal_communication]
 
   - id: ARTS231
     code: "ARTS 231"
     title: "Drawing I: Fundamentals of Drawing"
     credits: 3
-    tags: [arts_humanities, goal_reasoning]
+    tags: [arts, goal_reasoning]
 
   - id: MUSC121
     code: "MUSC 121"
     title: "Music Appreciation"
     credits: 3
-    tags: [arts_humanities, goal_communication]
+    tags: [arts, goal_communication]
 
   - id: THEA101
     code: "THEA 101"
     title: "Introduction to Theatre"
     credits: 3
-    tags: [arts_humanities, goal_communication]
-
-  - id: ENGL112L
-    code: "ENGL 112L"
-    title: "Introduction to Literature"
-    credits: 3
-    tags: [arts_humanities, goal_communication]
-
-  - id: ENGL114L
-    code: "ENGL 114L"
-    title: "American Writers, American Experiences"
-    credits: 3
-    tags: [arts_humanities, goal_communication]
-
-  - id: ENGL215L
-    code: "ENGL 215L"
-    title: "Deep Dive Literature"
-    credits: 3
-    tags: [arts_humanities, goal_inquiry]
-
-  - id: PHIL110P
-    code: "PHIL 110P"
-    title: "Introduction to Philosophy"
-    credits: 3
-    tags: [arts_humanities, goal_reasoning]
-
-  - id: PHIL150P
-    code: "PHIL 150P"
-    title: "Life, Death, and Meaning"
-    credits: 3
-    tags: [arts_humanities, goal_reasoning]
-
-  - id: PHIL155E
-    code: "PHIL 155E"
-    title: "Human Nature"
-    credits: 3
-    tags: [arts_humanities, goal_inquiry]
-
-  - id: HIST100H
-    code: "HIST 100H"
-    title: "Interpreting the World Past Since 1500"
-    credits: 3
-    tags: [arts_humanities, goal_civic]
-
-  - id: HIST101H
-    code: "HIST 101H"
-    title: "Interpreting the Asian Past"
-    credits: 3
-    tags: [arts_humanities, goal_civic]
-
-  - id: HIST102H
-    code: "HIST 102H"
-    title: "Interpreting the European Past"
-    credits: 3
-    tags: [arts_humanities, goal_civic]
-
-  - id: HIST103H
-    code: "HIST 103H"
-    title: "Interpreting the Latin American Past"
-    credits: 3
-    tags: [arts_humanities, goal_civic, goal_inquiry]       # double-goal (2 of 5)
-
-  - id: HIST104H
-    code: "HIST 104H"
-    title: "Interpreting the American Past"
-    credits: 3
-    tags: [arts_humanities, goal_civic]
-
-  - id: HIST105H
-    code: "HIST 105H"
-    title: "Interpreting the African Past"
-    credits: 3
-    tags: [arts_humanities, goal_civic]
-
-  - id: AFAM201
-    code: "AFAM 201"
-    title: "Introduction to African American Studies"
-    credits: 3
-    tags: [arts_humanities, goal_civic]
+    tags: [arts, goal_communication]
 
   - id: DANC110A
     code: "DANC 110A"
     title: "Dance Appreciation"
     credits: 3
-    tags: [arts_humanities, goal_communication]
+    tags: [arts, goal_communication]
 
   - id: DANC210A
     code: "DANC 210A"
     title: "Choreography and Composition"
     credits: 3
-    tags: [arts_humanities, goal_reasoning]
+    tags: [arts, goal_reasoning]
+
+  # ── Humanities ─────────────────────────────────────────────────────────────
+  - id: ENGL112L
+    code: "ENGL 112L"
+    title: "Introduction to Literature"
+    credits: 3
+    tags: [humanities, goal_communication]
+
+  - id: ENGL114L
+    code: "ENGL 114L"
+    title: "American Writers, American Experiences"
+    credits: 3
+    tags: [humanities, goal_communication]
+
+  - id: ENGL215L
+    code: "ENGL 215L"
+    title: "Deep Dive Literature"
+    credits: 3
+    tags: [humanities, goal_inquiry]
+
+  - id: PHIL110P
+    code: "PHIL 110P"
+    title: "Introduction to Philosophy"
+    credits: 3
+    tags: [humanities, goal_reasoning]
+
+  - id: PHIL150P
+    code: "PHIL 150P"
+    title: "Life, Death, and Meaning"
+    credits: 3
+    tags: [humanities, goal_reasoning]
+
+  - id: PHIL155E
+    code: "PHIL 155E"
+    title: "Human Nature"
+    credits: 3
+    tags: [humanities, goal_inquiry]
+
+  - id: HIST100H
+    code: "HIST 100H"
+    title: "Interpreting the World Past Since 1500"
+    credits: 3
+    tags: [humanities, goal_civic]
+
+  - id: HIST101H
+    code: "HIST 101H"
+    title: "Interpreting the Asian Past"
+    credits: 3
+    tags: [humanities, goal_civic]
+
+  - id: HIST102H
+    code: "HIST 102H"
+    title: "Interpreting the European Past"
+    credits: 3
+    tags: [humanities, goal_civic]
+
+  - id: HIST103H
+    code: "HIST 103H"
+    title: "Interpreting the Latin American Past"
+    credits: 3
+    tags: [humanities, goal_civic, goal_inquiry]            # double-goal (2 of 5)
+
+  - id: HIST104H
+    code: "HIST 104H"
+    title: "Interpreting the American Past"
+    credits: 3
+    tags: [humanities, goal_civic]
+
+  - id: HIST105H
+    code: "HIST 105H"
+    title: "Interpreting the African Past"
+    credits: 3
+    tags: [humanities, goal_civic]
+
+  - id: AFAM201
+    code: "AFAM 201"
+    title: "Introduction to African American Studies"
+    credits: 3
+    tags: [humanities, goal_civic]
 
   # ── Behavioral & Social Science ────────────────────────────────────────────
   - id: PSYC201S
@@ -391,7 +392,7 @@ courses:
     code: "PHIL 225E"
     title: "Ethics, Technology, and Society"
     credits: 3
-    tags: [arts_humanities, goal_civic]
+    tags: [humanities, goal_civic]
 
   - id: COMM272G
     code: "COMM 272G"

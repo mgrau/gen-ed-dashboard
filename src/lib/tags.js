@@ -12,7 +12,8 @@ export const TAG_META = {
   goal_communication:{ label: 'Communication & Expression',    short: 'COMM', color: 'bg-green-100 text-green-700 border-green-300' },
   goal_civic:        { label: 'Civic Engagement',              short: 'CIV',  color: 'bg-purple-100 text-purple-700 border-purple-300' },
   natural_science:   { label: 'Natural Science',               short: 'SCI',  color: 'bg-teal-100 text-teal-700 border-teal-300' },
-  arts_humanities:   { label: 'Arts & Humanities',             short: 'A&H',  color: 'bg-pink-100 text-pink-700 border-pink-300' },
+  arts:              { label: 'Arts',                          short: 'ART',  color: 'bg-pink-100 text-pink-700 border-pink-300' },
+  humanities:        { label: 'Humanities',                    short: 'HUM',  color: 'bg-rose-100 text-rose-700 border-rose-300' },
   social_science:    { label: 'Behavioral/Social Science',     short: 'BSS',  color: 'bg-orange-100 text-orange-700 border-orange-300' },
 }
 
