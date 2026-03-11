@@ -31,9 +31,59 @@
     'Fall Year 4', 'Spring Year 4'
   ]
 
-  const semesters = writable(
-    Object.fromEntries(semesterLabels.map(label => [label, []]))
-  )
+  const STORAGE_KEY = 'odu-gened-semesters'
+  const courseMap = Object.fromEntries(allCourses.courses.map(c => [c.id, c]))
+
+  function encodeState(semMap) {
+    const compact = {}
+    semesterLabels.forEach((label, i) => {
+      if (semMap[label]?.length) compact[i] = semMap[label].map(c => c.id)
+    })
+    return btoa(JSON.stringify(compact))
+  }
+
+  function decodeState(encoded) {
+    try {
+      const compact = JSON.parse(atob(encoded))
+      const result = Object.fromEntries(semesterLabels.map(l => [l, []]))
+      for (const [idx, ids] of Object.entries(compact)) {
+        const label = semesterLabels[parseInt(idx)]
+        if (label) result[label] = ids.map(id => courseMap[id]).filter(Boolean)
+      }
+      return result
+    } catch (_) { return null }
+  }
+
+  function loadSemesters() {
+    // URL hash takes priority (enables sharing)
+    const hash = location.hash.slice(1)
+    if (hash) {
+      const decoded = decodeState(hash)
+      if (decoded) return decoded
+    }
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) return JSON.parse(saved)
+    } catch (_) {}
+    return Object.fromEntries(semesterLabels.map(label => [label, []]))
+  }
+
+  const semesters = writable(loadSemesters())
+  semesters.subscribe(value => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(value)) } catch (_) {}
+  })
+
+  let copyConfirmed = false
+  function copyLink() {
+    const hasContent = Object.values($semesters).some(c => c.length > 0)
+    const url = hasContent
+      ? `${location.origin}${location.pathname}#${encodeState($semesters)}`
+      : location.href
+    navigator.clipboard.writeText(url).then(() => {
+      copyConfirmed = true
+      setTimeout(() => copyConfirmed = false, 2000)
+    })
+  }
 
   $: placedCourses = Object.values($semesters).flat()
   $: placedIds = new Set(placedCourses.map(c => c.id))
@@ -140,7 +190,13 @@
     <h1 class="text-lg font-bold tracking-wide">ODU Gen Ed Dashboard</h1>
     <p class="text-xs text-blue-200">Faculty Simulation Tool</p>
   </div>
-  <span class="text-xs text-blue-300">Catalog Year: 2027–2028</span>
+  <div class="flex items-center gap-3">
+    <span class="text-xs text-blue-300">Catalog Year: 2027–2028</span>
+    <button
+      class="text-xs px-2 py-1 rounded border transition-colors {copyConfirmed ? 'border-green-400 text-green-300' : 'border-blue-400 text-blue-300 hover:border-blue-200 hover:text-blue-100'}"
+      on:click={copyLink}
+    >{copyConfirmed ? '✓ Copied' : 'Copy link'}</button>
+  </div>
 </header>
 
 <FrameworkTabs
