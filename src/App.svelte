@@ -133,7 +133,9 @@
   }
 </script>
 
-<header class="bg-odu-blue text-white px-6 py-3 flex items-center justify-between shadow">
+<div class="flex flex-col h-full overflow-hidden">
+
+<header class="bg-odu-blue text-white px-6 py-3 flex items-center justify-between shadow shrink-0">
   <div>
     <h1 class="text-lg font-bold tracking-wide">ODU Gen Ed Dashboard</h1>
     <p class="text-xs text-blue-200">Faculty Simulation Tool</p>
@@ -149,7 +151,7 @@
 
 <CreditSummaryBar framework={activeFramework} {evaluation} {placedCourses} />
 
-<main class="flex flex-col md:flex-row overflow-hidden" style="height: calc(100vh - 96px)">
+<main class="flex flex-col md:flex-row overflow-hidden flex-1 min-h-0">
 
   <!-- Mobile: collapsible Plan dropdown -->
   <div class="md:hidden shrink-0 bg-white border-b border-gray-200">
@@ -275,3 +277,5 @@
 
   </div>
 </main>
+
+</div>

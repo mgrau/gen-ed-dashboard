@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #app {
+    height: 100%;
+    overflow: hidden;
+  }
   body {
     @apply bg-gray-50 text-gray-800 font-sans;
   }
