@@ -15,6 +15,7 @@
   const baseFrameworks = [frameworkA, frameworkB]
   let activeFrameworkIndex = 0
   let editMode = false
+  let compareMode = false
 
   // Per-framework overrides from the live editor (in-memory only)
   let frameworkOverrides = {}
@@ -89,6 +90,7 @@
   $: placedIds = new Set(placedCourses.map(c => c.id))
   $: pool = allCourses.courses.filter(c => !placedIds.has(c.id))
   $: evaluation = evaluate(activeFramework, placedCourses)
+  $: allEvaluations = baseFrameworks.map((fw, i) => evaluate(frameworkOverrides[i] ?? fw, placedCourses))
 
   /** Map courseId → the label of its assigned leaf section. */
   function buildAssignmentMap(sections, evalSections) {
@@ -203,6 +205,7 @@
   frameworks={baseFrameworks}
   bind:activeIndex={activeFrameworkIndex}
   bind:editMode
+  bind:compareMode
 />
 
 <CreditSummaryBar framework={activeFramework} {evaluation} {placedCourses} />
@@ -250,22 +253,51 @@
   </div>
 
   <!-- Desktop: left aside -->
-  <aside class="hidden md:flex md:flex-col w-[360px] min-w-[280px] shrink-0 border-r border-gray-200 overflow-hidden bg-white">
-    <div class="flex flex-col h-full" class:hidden={!editMode}>
-      <FrameworkEditor
-        framework={baseFrameworks[activeFrameworkIndex]}
-        onUpdate={handleFrameworkEdit}
-      />
-    </div>
-    <div class="overflow-y-auto flex-1" class:hidden={editMode}>
-      <RequirementsTracker
-        framework={activeFramework}
-        {evaluation}
-        activeFilterTags={poolFilterTags}
-        onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
-      />
-    </div>
-  </aside>
+  {#if compareMode}
+    <aside class="hidden md:flex shrink-0 border-r border-gray-200 overflow-hidden bg-white" style="width: min(680px, 48%)">
+      {#each baseFrameworks as fw, i}
+        {@const fwEval = allEvaluations[i]}
+        <div class="flex flex-col flex-1 min-w-0 overflow-hidden {i > 0 ? 'border-l border-gray-200' : ''}">
+          <!-- Framework header -->
+          <div class="px-3 py-2 border-b border-gray-100 shrink-0 flex items-center justify-between bg-gray-50">
+            <span class="text-xs font-semibold text-odu-blue truncate">{fw.name}</span>
+            {#if fwEval.satisfied}
+              <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-green-100 text-green-700 border border-green-300 shrink-0">DONE</span>
+            {:else}
+              {@const cr = Object.values(fwEval.sections).reduce((s, r) => s + (r?.creditsFulfilled ?? 0), 0)}
+              {@const req = Object.values(fwEval.sections).reduce((s, r) => s + (r?.creditsRequired ?? 0), 0)}
+              <span class="text-[10px] tabular-nums text-gray-400 shrink-0">{cr}/{req} cr</span>
+            {/if}
+          </div>
+          <div class="overflow-y-auto flex-1">
+            <RequirementsTracker
+              framework={fw}
+              evaluation={fwEval}
+              activeFilterTags={poolFilterTags}
+              onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
+            />
+          </div>
+        </div>
+      {/each}
+    </aside>
+  {:else}
+    <aside class="hidden md:flex md:flex-col w-[360px] min-w-[280px] shrink-0 border-r border-gray-200 overflow-hidden bg-white">
+      <div class="flex flex-col h-full" class:hidden={!editMode}>
+        <FrameworkEditor
+          framework={baseFrameworks[activeFrameworkIndex]}
+          onUpdate={handleFrameworkEdit}
+        />
+      </div>
+      <div class="overflow-y-auto flex-1" class:hidden={editMode}>
+        <RequirementsTracker
+          framework={activeFramework}
+          {evaluation}
+          activeFilterTags={poolFilterTags}
+          onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
+        />
+      </div>
+    </aside>
+  {/if}
 
   <!-- Center + right on desktop / stacked on mobile -->
   <div class="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
