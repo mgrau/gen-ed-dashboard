@@ -42,7 +42,13 @@
 </script>
 
 <div>
-  <h2 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">Semester Planner</h2>
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Semester Planner</h2>
+    <button
+      class="text-xs px-2 py-1 rounded border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400 transition-colors"
+      on:click={() => semesters.update(s => Object.fromEntries(Object.keys(s).map(k => [k, []])))}
+    >Clear all</button>
+  </div>
   <div class="grid grid-cols-1 gap-2 @sm:grid-cols-2 @2xl:grid-cols-4">
     {#each semesterLabels as label}
       {@const courses = $semesters[label] ?? []}
