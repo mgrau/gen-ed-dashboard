@@ -4,14 +4,23 @@
   import allCourses from '../data/courses.yaml'
   import FrameworkTabs from './components/FrameworkTabs.svelte'
   import RequirementsTracker from './components/RequirementsTracker.svelte'
+  import FrameworkEditor from './components/FrameworkEditor.svelte'
   import SemesterPlanner from './components/SemesterPlanner.svelte'
   import CourseCard from './components/CourseCard.svelte'
   import { evaluate } from './lib/engine.js'
   import { TAG_META } from './lib/tags.js'
 
-  const frameworks = [frameworkA]
+  const baseFrameworks = [frameworkA]
   let activeFrameworkIndex = 0
-  $: activeFramework = frameworks[activeFrameworkIndex]
+  let editMode = false
+
+  // Per-framework overrides from the live editor (in-memory only)
+  let frameworkOverrides = {}
+  $: activeFramework = frameworkOverrides[activeFrameworkIndex] ?? baseFrameworks[activeFrameworkIndex]
+
+  function handleFrameworkEdit(updated) {
+    frameworkOverrides = { ...frameworkOverrides, [activeFrameworkIndex]: updated }
+  }
 
   const semesterLabels = [
     'Fall Year 1', 'Spring Year 1',
@@ -89,7 +98,11 @@
   <span class="text-xs text-blue-300">Catalog Year: 2027–2028</span>
 </header>
 
-<FrameworkTabs {frameworks} bind:activeIndex={activeFrameworkIndex} />
+<FrameworkTabs
+  frameworks={baseFrameworks}
+  bind:activeIndex={activeFrameworkIndex}
+  bind:editMode
+/>
 
 <main class="flex flex-col md:flex-row overflow-hidden" style="height: calc(100vh - 96px)">
 
@@ -115,24 +128,40 @@
     </div>
     {#if planOpen}
       <div class="border-t border-gray-100 overflow-y-auto max-h-56">
-        <RequirementsTracker
-          framework={activeFramework}
-          {evaluation}
-          activeFilterTags={poolFilterTags}
-          onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
-        />
+        <div class:hidden={!editMode}>
+          <FrameworkEditor
+            framework={baseFrameworks[activeFrameworkIndex]}
+            onUpdate={handleFrameworkEdit}
+          />
+        </div>
+        <div class:hidden={editMode}>
+          <RequirementsTracker
+            framework={activeFramework}
+            {evaluation}
+            activeFilterTags={poolFilterTags}
+            onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
+          />
+        </div>
       </div>
     {/if}
   </div>
 
   <!-- Desktop: left aside -->
-  <aside class="hidden md:block w-[360px] min-w-[280px] shrink-0 border-r border-gray-200 overflow-y-auto bg-white">
-    <RequirementsTracker
-      framework={activeFramework}
-      {evaluation}
-      activeFilterTags={poolFilterTags}
-      onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
-    />
+  <aside class="hidden md:flex md:flex-col w-[360px] min-w-[280px] shrink-0 border-r border-gray-200 overflow-hidden bg-white">
+    <div class="flex flex-col h-full" class:hidden={!editMode}>
+      <FrameworkEditor
+        framework={baseFrameworks[activeFrameworkIndex]}
+        onUpdate={handleFrameworkEdit}
+      />
+    </div>
+    <div class="overflow-y-auto flex-1" class:hidden={editMode}>
+      <RequirementsTracker
+        framework={activeFramework}
+        {evaluation}
+        activeFilterTags={poolFilterTags}
+        onSelectTags={tags => { poolFilterTags = tags; poolSearch = '' }}
+      />
+    </div>
   </aside>
 
   <!-- Center + right on desktop / stacked on mobile -->

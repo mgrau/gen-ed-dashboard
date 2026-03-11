@@ -2,7 +2,7 @@
 # Goal tags (a course may carry at most 2):
 #   goal_inquiry | goal_reasoning | goal_communication | goal_civic
 # Breadth tags (independent of goals):
-#   natural_science_lab | arts_humanities | social_science
+#   natural_science | arts_humanities | social_science
 # Foundational/special tags (exclusive to their section):
 #   fys | composition | math_foundational | gened_capstone
 #
@@ -82,49 +82,49 @@ courses:
     code: "BIOL 105N"
     title: "Biology for Nonscience Majors I"
     credits: 4
-    tags: [natural_science_lab, goal_inquiry]
+    tags: [natural_science, goal_inquiry]
 
   - id: BIOL106N
     code: "BIOL 106N"
     title: "Biology for Nonscience Majors II"
     credits: 4
-    tags: [natural_science_lab, goal_inquiry]
+    tags: [natural_science, goal_inquiry]
 
   - id: BIOL121N
     code: "BIOL 121N"
     title: "General Biology I (with Lab)"
     credits: 4
-    tags: [natural_science_lab, goal_inquiry]
+    tags: [natural_science, goal_inquiry]
 
   - id: CHEM105N
     code: "CHEM 105N"
     title: "Introductory Chemistry (with Lab)"
     credits: 4
-    tags: [natural_science_lab, goal_reasoning]
+    tags: [natural_science, goal_reasoning]
 
   - id: CHEM121N
     code: "CHEM 121N"
     title: "Foundations of Chemistry I (with Lab)"
     credits: 4
-    tags: [natural_science_lab, goal_reasoning]
+    tags: [natural_science, goal_reasoning]
 
   - id: PHYS101N
     code: "PHYS 101N"
     title: "Conceptual Physics I"
     credits: 4
-    tags: [natural_science_lab, goal_reasoning]
+    tags: [natural_science, goal_reasoning]
 
   - id: PHYS102N
     code: "PHYS 102N"
     title: "Conceptual Physics II"
     credits: 4
-    tags: [natural_science_lab, goal_reasoning]
+    tags: [natural_science, goal_reasoning]
 
   - id: PHYS111N
     code: "PHYS 111N"
     title: "Introductory General Physics I"
     credits: 4
-    tags: [natural_science_lab, goal_reasoning]
+    tags: [natural_science, goal_reasoning]
 
   # ── Fine Arts & Humanities ─────────────────────────────────────────────────
   - id: ARTS122A
@@ -143,7 +143,7 @@ courses:
     code: "MUSC 121"
     title: "Music Appreciation"
     credits: 3
-    tags: [arts_humanities]
+    tags: [arts_humanities, goal_communication]
 
   - id: THEA101
     code: "THEA 101"

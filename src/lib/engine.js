@@ -1,33 +1,47 @@
 /**
  * Requirement evaluation engine.
  *
- * Exclusivity and overflow rules:
- *  1. FYS          → locked exclusively, never reused
- *  2. Composition  → locked exclusively, never reused
- *  3. Math         → ONE course locked; extras free for Goals
- *  4. Goals        → only as many courses as needed to reach minimums + 19-credit total
- *                    are locked. Surplus goal-eligible courses stay unlocked.
- *  5. Electives    → all unlocked courses (includes surplus goal courses)
- *  6. Capstone     → locked exclusively
+ * Schema:
+ *   section.tags:          string[]   courses must match at least one tag (OR logic)
+ *   section.credits:       number     fixed amount — both min and allocation cap
+ *   section.min_credits:   number     satisfaction threshold; allocation stops at this cap
+ *   section.max_credits:   number     same as credits (only-max = same as credits)
+ *   section.min_credits + max_credits: min for satisfaction, max for allocation cap
+ *   section.courses:       number     fixed course count — both min and cap
+ *   section.min_courses:   number     minimum distinct courses required
+ *   section.max_courses:   number     same as courses
+ *   section.subcategories: section[]  nested requirements
+ *   section.overlay:       boolean    evaluated against parent's already-assigned courses,
+ *                                     not the global pool; no courses consumed
+ *   section.elective:      boolean    catch-all for unassigned courses
+ *   section.note:          string     display note
  *
- * Display rule: each result.courses contains ONLY the courses actively
- * fulfilling that requirement — extras are not listed.
+ * Allocation:
+ *   Each course is assigned to exactly one non-overlay leaf section.
+ *   The greedy algorithm maximises satisfied requirements by processing
+ *   the most-constrained courses first and filling the most-urgent sections.
+ *   Overlay sections are excluded from allocation entirely; they are evaluated
+ *   post-hoc against the courses already assigned to their parent.
+ *
+ * Overlay tiebreaker:
+ *   When two courses are equally constrained (same number of eligible sections),
+ *   prefer the one carrying overlay-useful tags. This ensures that a course
+ *   eligible for both a learning goal and a disciplinary breadth area lands
+ *   in the goal pool rather than being displaced to electives.
  */
 
 export function evaluate(framework, placedCourses) {
-  const usedIds = new Set()
-  const sectionResults = {}
+  const leaves = []
+  collectLeaves(framework.sections, leaves)
+  const elective = findFirst(framework.sections, s => s.elective)
+  const overlayTags = collectAllOverlayTags(framework.sections)
+  const parentMap = buildParentMap(framework.sections)
 
+  const assignment = allocate(leaves, elective, placedCourses, overlayTags, parentMap)
+
+  const sectionResults = {}
   for (const section of framework.sections) {
-    let result
-    switch (section.type) {
-      case 'fixed':   result = evaluateFixed(section, placedCourses, usedIds); break
-      case 'group':   result = evaluateFoundational(section, placedCourses, usedIds); break
-      case 'goals':   result = evaluateGoals(section, placedCourses, usedIds); break
-      case 'elective':result = evaluateElective(section, placedCourses, usedIds); break
-      default:        result = evaluateFixed(section, placedCourses, usedIds)
-    }
-    sectionResults[section.id] = result
+    sectionResults[section.id] = buildResult(section, assignment, placedCourses)
   }
 
   return {
@@ -36,213 +50,317 @@ export function evaluate(framework, placedCourses) {
   }
 }
 
-/** Locks all matching courses to this section */
-function evaluateFixed(section, placedCourses, usedIds) {
-  const matching = placedCourses.filter(c =>
-    !usedIds.has(c.id) && c.tags.some(t => section.course_tags?.includes(t))
-  )
-  matching.forEach(c => usedIds.add(c.id))
-  const credits = sumCredits(matching)
-  return {
-    satisfied: credits >= section.credits_required,
-    creditsFulfilled: credits,
-    creditsRequired: section.credits_required,
-    courses: matching
+// ─── Schema helpers ────────────────────────────────────────────────────────────
+
+function minCredits(s) {
+  return s.credits ?? s.max_credits ?? s.min_credits ?? 0
+}
+
+function maxCredits(s) {
+  if (s.min_credits != null && s.max_credits != null) return s.max_credits
+  return s.credits ?? s.max_credits ?? s.min_credits ?? Infinity
+}
+
+function minCourses(s) {
+  return s.courses ?? s.max_courses ?? s.min_courses ?? 0
+}
+
+function maxCourses(s) {
+  if (s.min_courses != null && s.max_courses != null) return s.max_courses
+  return s.courses ?? s.max_courses ?? s.min_courses ?? Infinity
+}
+
+// ─── Tree traversal ────────────────────────────────────────────────────────────
+
+/** Collect all allocating leaf sections (skips overlay subtrees and electives). */
+function collectLeaves(sections, out) {
+  for (const s of sections) {
+    if (s.overlay) continue
+    if (s.subcategories?.length) collectLeaves(s.subcategories, out)
+    else if (!s.elective) out.push(s)
   }
 }
 
-/**
- * Foundational group.
- * Composition: all matching locked.
- * Math: only ONE course locked; extras remain free for Goals.
- *
- * Selection rule: when locking a single course, prefer the one with the fewest
- * tags that contribute to other requirements (goals, breadth). This ensures
- * multi-tagged courses (e.g. math_foundational + goal_reasoning) are freed up
- * to satisfy goals, regardless of the order courses were placed.
- */
-
-// Tags that can contribute to sections evaluated after foundational
-const PORTABLE_TAGS = new Set([
-  'goal_inquiry', 'goal_reasoning', 'goal_communication', 'goal_civic',
-  'natural_science_lab', 'arts_humanities', 'social_science'
-])
-
-function portableTagCount(course) {
-  return course.tags.filter(t => PORTABLE_TAGS.has(t)).length
+/** Collect the IDs of all allocating leaf sections under a given section. */
+function collectLeafIds(section, out) {
+  if (section.overlay) return
+  if (section.subcategories?.length) {
+    for (const sub of section.subcategories) collectLeafIds(sub, out)
+  } else if (!section.elective) {
+    out.add(section.id)
+  }
 }
 
-function evaluateFoundational(section, placedCourses, usedIds) {
-  const subsections = {}
-  for (const sub of section.subsections) {
-    const available = placedCourses.filter(c =>
-      !usedIds.has(c.id) && c.tags.some(t => sub.course_tags?.includes(t))
-    )
-    // Only lock ONE course for math and composition; extras are free for goals/electives.
-    // Sort so the course with the fewest portable tags is locked first.
-    let locked
-    if (sub.id === 'math' || sub.id === 'composition') {
-      const sorted = available.slice().sort((a, b) => portableTagCount(a) - portableTagCount(b))
-      locked = sorted.slice(0, 1)
-    } else {
-      locked = available
+/** Build a map from section id → parent section object. */
+function buildParentMap(sections, parent = null, map = new Map()) {
+  for (const s of sections) {
+    if (parent !== null) map.set(s.id, parent)
+    if (s.subcategories?.length) buildParentMap(s.subcategories, s, map)
+  }
+  return map
+}
+
+function findFirst(sections, predicate) {
+  for (const s of sections) {
+    if (predicate(s)) return s
+    if (s.subcategories) {
+      const found = findFirst(s.subcategories, predicate)
+      if (found) return found
     }
-    locked.forEach(c => usedIds.add(c.id))
-    const credits = sumCredits(locked)
-    subsections[sub.id] = {
-      satisfied: credits >= sub.credits_required,
+  }
+  return null
+}
+
+/** Collect all tags referenced inside overlay subtrees. */
+function collectAllOverlayTags(sections) {
+  const tags = new Set()
+  function recurse(sections) {
+    for (const s of sections) {
+      if (s.overlay) {
+        collectTagsDeep(s, tags)
+      } else if (s.subcategories) {
+        recurse(s.subcategories)
+      }
+    }
+  }
+  recurse(sections)
+  return tags
+}
+
+function collectTagsDeep(section, out) {
+  section.tags?.forEach(t => out.add(t))
+  section.subcategories?.forEach(sub => collectTagsDeep(sub, out))
+}
+
+// ─── Allocation ────────────────────────────────────────────────────────────────
+
+/**
+ * Assigns each course to exactly one allocating leaf section.
+ * Overlay sections play no role here — they are evaluated later in buildResult.
+ *
+ * Two-pass algorithm:
+ *
+ *   Pass 1 — satisfy minimums (greedy):
+ *     Process most-constrained courses first. Assign each to the eligible section
+ *     with the greatest unmet deficit. The allocation cap equals the section's
+ *     minimum (or explicit max), so courses overflow to other sections once a
+ *     minimum is met. Tiebreak: prefer courses with overlay-useful tags so they
+ *     land in the parent pool and can satisfy breadth checks.
+ *
+ *   Pass 2 — absorb remaining courses in YAML order:
+ *     Any course not placed in Pass 1 is assigned to the first eligible section
+ *     (in framework definition order: FYS → Foundational → Goals → Capstone)
+ *     that has no explicit maximum. Sections with only min_credits accept
+ *     unlimited additional courses in this pass. This ensures that extra inquiry
+ *     courses stay in Inquiry rather than falling through to Electives.
+ */
+function allocate(leaves, elective, courses, overlayTags, parentMap) {
+  const assignment = new Map()
+  const secCredits = new Map(leaves.map(s => [s.id, 0]))
+  const secCount   = new Map(leaves.map(s => [s.id, 0]))
+
+  function canAccept(s, course) {
+    return secCredits.get(s.id) < maxCredits(s) &&
+           secCount.get(s.id)   < maxCourses(s)
+  }
+
+  function isEligible(s, course) {
+    if (!s.tags?.length) return true
+    return course.tags.some(t => s.tags.includes(t))
+  }
+
+  function deficit(s) {
+    return Math.max(0, minCredits(s) - secCredits.get(s.id))
+  }
+
+  const unassigned = new Set(courses.map(c => c.id))
+
+  // ── Pass 1: fill minimums ──────────────────────────────────────────────────
+  let changed = true
+  while (changed) {
+    changed = false
+
+    const pending = courses
+      .filter(c => unassigned.has(c.id))
+      .map(c => ({
+        course: c,
+        options: leaves.filter(s => isEligible(s, c) && canAccept(s, c) && deficit(s) > 0),
+        hasOverlayTag: overlayTags.size > 0 && c.tags.some(t => overlayTags.has(t))
+      }))
+      .filter(x => x.options.length > 0)
+      .sort((a, b) => {
+        if (a.options.length !== b.options.length) return a.options.length - b.options.length
+        // Tiebreak: overlay-useful courses first so they land in the parent pool
+        return (b.hasOverlayTag ? 1 : 0) - (a.hasOverlayTag ? 1 : 0)
+      })
+
+    for (const { course, options } of pending) {
+      if (!unassigned.has(course.id)) continue
+
+      const live = options.filter(s => canAccept(s, course) && deficit(s) > 0)
+      if (!live.length) continue
+
+      const target = live.reduce((best, s) => deficit(s) > deficit(best) ? s : best)
+
+      assignment.set(course.id, target.id)
+      unassigned.delete(course.id)
+      secCredits.set(target.id, secCredits.get(target.id) + course.credits)
+      secCount.set(target.id, secCount.get(target.id) + 1)
+      changed = true
+    }
+  }
+
+  // ── Pass 2: absorb leftovers in YAML order ─────────────────────────────────
+  // Sections without an explicit max (only min_credits set) accept additional
+  // courses only while their parent's min_credits has not yet been reached.
+  // Once the parent is satisfied, extra courses fall through to Electives.
+  for (const course of courses) {
+    if (!unassigned.has(course.id)) continue
+
+    const target = leaves.find(s => {
+      if (hasExplicitMax(s) || !isEligible(s, course)) return false
+      const par = parentMap.get(s.id)
+      if (par?.min_credits != null) {
+        const leafIds = new Set()
+        collectLeafIds(par, leafIds)
+        const parentTotal = [...leafIds].reduce((sum, id) => sum + (secCredits.get(id) ?? 0), 0)
+        if (parentTotal >= par.min_credits) return false
+      }
+      return true
+    })
+    if (target) {
+      assignment.set(course.id, target.id)
+      unassigned.delete(course.id)
+      secCredits.set(target.id, secCredits.get(target.id) + course.credits)
+      secCount.set(target.id, secCount.get(target.id) + 1)
+    }
+  }
+
+  // Remaining → elective catch-all
+  for (const id of unassigned) {
+    assignment.set(id, elective?.id ?? null)
+  }
+
+  return assignment
+}
+
+/** True when the section has an explicit upper bound on credits or courses. */
+function hasExplicitMax(s) {
+  return s.credits != null || s.max_credits != null || s.courses != null || s.max_courses != null
+}
+
+// ─── Result builder ────────────────────────────────────────────────────────────
+
+function buildResult(section, assignment, allCourses) {
+  if (section.elective) {
+    const courses = allCourses.filter(c => assignment.get(c.id) === section.id)
+    const credits = sumCredits(courses)
+    return {
+      satisfied: credits >= minCredits(section),
       creditsFulfilled: credits,
-      creditsRequired: sub.credits_required,
-      courses: locked
-    }
-  }
-  const allSatisfied = Object.values(subsections).every(r => r.satisfied)
-  return {
-    satisfied: allSatisfied,
-    creditsFulfilled: Object.values(subsections).reduce((s, r) => s + r.creditsFulfilled, 0),
-    creditsRequired: section.credits_required,
-    subsections
-  }
-}
-
-/**
- * Goals section.
- *
- * Allocation:
- *   Pass 1 — assign single-goal courses to their goal.
- *   Pass 2 — assign double-tagged courses to the least-filled goal.
- *
- * Trimming to avoid over-counting:
- *   For each goal, only keep courses up to the goal's credit minimum.
- *   Then fill up to the section total (19 cr) with remaining courses.
- *   Anything beyond the section total is left unlocked → spills to Electives.
- *
- * Breadth: evaluated independently across all placed courses (a course
- * can satisfy breadth AND a goal simultaneously). Only courses up to the
- * breadth requirement are listed.
- */
-function evaluateGoals(section, placedCourses, usedIds) {
-  const goalTags = section.goals.map(g => g.tag)
-  const eligible = placedCourses.filter(c =>
-    !usedIds.has(c.id) && c.tags.some(t => goalTags.includes(t))
-  )
-
-  // --- Allocate to goals ---
-  const allocation = Object.fromEntries(section.goals.map(g => [g.id, []]))
-  const assigned = new Set()
-
-  // Pass 1: single-goal courses
-  for (const course of eligible) {
-    const matching = section.goals.filter(g => course.tags.includes(g.tag))
-    if (matching.length === 1) {
-      allocation[matching[0].id].push(course)
-      assigned.add(course.id)
-    }
-  }
-  // Pass 2: double-tagged → least-filled goal
-  for (const course of eligible) {
-    if (assigned.has(course.id)) continue
-    const matching = section.goals.filter(g => course.tags.includes(g.tag))
-    if (!matching.length) continue
-    const target = matching.reduce((least, g) =>
-      sumCredits(allocation[g.id]) < sumCredits(allocation[least.id]) ? g : least
-    )
-    allocation[target.id].push(course)
-    assigned.add(course.id)
-  }
-
-  // --- Trim to only what's needed ---
-  const used = Object.fromEntries(section.goals.map(g => [g.id, []]))
-  let totalUsed = 0
-
-  // Step 1: fill each goal to its minimum
-  for (const goal of section.goals) {
-    let goalCredits = 0
-    for (const course of allocation[goal.id]) {
-      if (goalCredits >= goal.credits_required) break
-      used[goal.id].push(course)
-      goalCredits += course.credits
-      totalUsed += course.credits
+      creditsRequired: minCredits(section),
+      courses
     }
   }
 
-  // Step 2: fill remaining budget up to section total
-  for (const goal of section.goals) {
-    for (const course of allocation[goal.id]) {
-      if (used[goal.id].includes(course)) continue   // already counted
-      if (totalUsed >= section.credits_required) break
-      used[goal.id].push(course)
-      totalUsed += course.credits
+  if (section.subcategories?.length) {
+    const allocating = section.subcategories.filter(s => !s.overlay)
+    const overlays   = section.subcategories.filter(s => s.overlay)
+
+    // Build results for allocating subcategories
+    const subcategories = {}
+    let totalCredits = 0
+    let totalRequired = 0
+    let allAllocatingSatisfied = true
+
+    for (const sub of allocating) {
+      const r = buildResult(sub, assignment, allCourses)
+      subcategories[sub.id] = r
+      totalCredits  += r.creditsFulfilled
+      totalRequired += r.creditsRequired
+      if (!r.satisfied) allAllocatingSatisfied = false
     }
-    if (totalUsed >= section.credits_required) break
+
+    // Build overlay results against the parent pool
+    // (all courses assigned to any allocating leaf under this section)
+    let allOverlaysSatisfied = true
+    if (overlays.length > 0) {
+      const parentLeafIds = new Set()
+      for (const sub of allocating) collectLeafIds(sub, parentLeafIds)
+      const parentPool = allCourses.filter(c => parentLeafIds.has(assignment.get(c.id)))
+
+      for (const overlay of overlays) {
+        const r = buildOverlayResult(overlay, parentPool)
+        subcategories[overlay.id] = r
+        if (!r.satisfied) allOverlaysSatisfied = false
+      }
+    }
+
+    const parentMin = minCredits(section)
+    const creditsRequired = Math.max(parentMin, totalRequired)
+
+    return {
+      satisfied: allAllocatingSatisfied && allOverlaysSatisfied && totalCredits >= parentMin,
+      creditsFulfilled: totalCredits,
+      creditsRequired,
+      subcategories
+    }
   }
 
-  // Lock only courses that are actively used for goals
-  for (const goal of section.goals) {
-    used[goal.id].forEach(c => usedIds.add(c.id))
-  }
-  // Surplus goal-eligible courses remain unlocked → electives will pick them up
-
-  // Score goals
-  const goalResults = {}
-  let allGoalsSatisfied = true
-  for (const goal of section.goals) {
-    const credits = sumCredits(used[goal.id])
-    const satisfied = credits >= goal.credits_required
-    if (!satisfied) allGoalsSatisfied = false
-    goalResults[goal.id] = {
-      satisfied,
-      creditsFulfilled: credits,
-      creditsRequired: goal.credits_required,
-      courses: used[goal.id]
-    }
-  }
-
-  // Breadth: take only as many courses as needed to satisfy each breadth requirement
-  const breadthResults = {}
-  let allBreadthSatisfied = true
-  for (const b of section.breadth) {
-    const matching = placedCourses.filter(c => c.tags.includes(b.tag))
-    const needed = []
-    let breadthCredits = 0
-    for (const course of matching) {
-      if (breadthCredits >= b.credits_required) break
-      needed.push(course)
-      breadthCredits += course.credits
-    }
-    const satisfied = breadthCredits >= b.credits_required
-    if (!satisfied) allBreadthSatisfied = false
-    breadthResults[b.id] = {
-      satisfied,
-      creditsFulfilled: breadthCredits,
-      creditsRequired: b.credits_required,
-      courses: needed
-    }
-  }
+  // Leaf section
+  const courses = allCourses.filter(c => assignment.get(c.id) === section.id)
+  const credits = sumCredits(courses)
+  const count = courses.length
 
   return {
-    satisfied: allGoalsSatisfied && totalUsed >= section.credits_required && allBreadthSatisfied,
-    creditsFulfilled: totalUsed,
-    creditsRequired: section.credits_required,
-    goals: goalResults,
-    breadth: breadthResults
-  }
-}
-
-/**
- * Electives: any course not locked to another requirement.
- * This naturally includes surplus goal-tagged courses since they were not locked.
- */
-function evaluateElective(section, placedCourses, usedIds) {
-  const available = placedCourses.filter(c => !usedIds.has(c.id))
-  available.forEach(c => usedIds.add(c.id))
-  const credits = sumCredits(available)
-  return {
-    satisfied: credits >= section.credits_required,
+    satisfied: credits >= minCredits(section) && count >= minCourses(section),
     creditsFulfilled: credits,
-    creditsRequired: section.credits_required,
-    courses: available,
-    note: section.note
+    creditsRequired: minCredits(section),
+    coursesFulfilled: count,
+    coursesRequired: minCourses(section),
+    courses
+  }
+}
+
+/**
+ * Evaluate an overlay section against the parent's already-assigned course pool.
+ * No courses are consumed from the global pool.
+ */
+function buildOverlayResult(section, parentPool) {
+  if (section.subcategories?.length) {
+    const subcategories = {}
+    let allSatisfied = true
+    for (const sub of section.subcategories) {
+      const r = buildOverlayResult(sub, parentPool)
+      subcategories[sub.id] = r
+      if (!r.satisfied) allSatisfied = false
+    }
+    return {
+      satisfied: allSatisfied,
+      creditsFulfilled: 0,
+      creditsRequired: 0,
+      subcategories
+    }
+  }
+
+  // Overlay leaf: filter parent pool by this section's tags
+  const matching = parentPool.filter(c => c.tags.some(t => section.tags?.includes(t)))
+  const needed = []
+  let credits = 0
+  const cap = maxCredits(section)
+  for (const course of matching) {
+    if (credits >= cap) break
+    needed.push(course)
+    credits += course.credits
+  }
+
+  return {
+    satisfied: credits >= minCredits(section) && needed.length >= minCourses(section),
+    creditsFulfilled: credits,
+    creditsRequired: minCredits(section),
+    coursesFulfilled: needed.length,
+    coursesRequired: minCourses(section),
+    courses: needed
   }
 }
 
