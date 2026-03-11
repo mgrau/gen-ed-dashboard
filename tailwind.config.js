@@ -3,6 +3,9 @@ export default {
   content: ['./index.html', './src/**/*.{svelte,js,ts}'],
   theme: {
     extend: {
+      screens: {
+        md: '1000px'
+      },
       colors: {
         odu: {
           blue: '#003057',
@@ -13,5 +16,5 @@ export default {
       }
     }
   },
-  plugins: []
+  plugins: [require('@tailwindcss/container-queries')]
 }

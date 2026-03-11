@@ -172,7 +172,7 @@
   <div class="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
 
     <!-- Semester Planner: top half on mobile, center on desktop -->
-    <section class="flex-1 min-h-0 overflow-y-auto p-4 border-b md:border-b-0 border-gray-200">
+    <section class="@container flex-1 min-h-0 overflow-y-auto p-4 border-b md:border-b-0 border-gray-200">
       <SemesterPlanner {semesterLabels} {semesters} />
     </section>
 
