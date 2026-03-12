@@ -5,7 +5,11 @@
   import allCourses from '../data/courses.yaml'
   import FrameworkTabs from './components/FrameworkTabs.svelte'
   import RequirementsTracker from './components/RequirementsTracker.svelte'
-  import FrameworkEditor from './components/FrameworkEditor.svelte'
+  // FrameworkEditor (+ CodeMirror) is lazy-loaded on first use
+  let FrameworkEditor = null
+  $: if (editMode && !FrameworkEditor) {
+    import('./components/FrameworkEditor.svelte').then(m => { FrameworkEditor = m.default })
+  }
   import SemesterPlanner from './components/SemesterPlanner.svelte'
   import CourseCard from './components/CourseCard.svelte'
   import { evaluate } from './lib/engine.js'
@@ -234,12 +238,14 @@
     </div>
     {#if planOpen}
       <div class="border-t border-gray-100 overflow-y-auto max-h-56">
-        <div class:hidden={!editMode}>
-          <FrameworkEditor
-            framework={baseFrameworks[activeFrameworkIndex]}
-            onUpdate={handleFrameworkEdit}
-          />
-        </div>
+        {#if FrameworkEditor}
+          <div class:hidden={!editMode}>
+            <svelte:component this={FrameworkEditor}
+              framework={baseFrameworks[activeFrameworkIndex]}
+              onUpdate={handleFrameworkEdit}
+            />
+          </div>
+        {/if}
         <div class:hidden={editMode}>
           <RequirementsTracker
             framework={activeFramework}
@@ -282,12 +288,14 @@
     </aside>
   {:else}
     <aside class="hidden md:flex md:flex-col w-[360px] min-w-[280px] shrink-0 border-r border-gray-200 overflow-hidden bg-white">
-      <div class="flex flex-col h-full" class:hidden={!editMode}>
-        <FrameworkEditor
-          framework={baseFrameworks[activeFrameworkIndex]}
-          onUpdate={handleFrameworkEdit}
-        />
-      </div>
+      {#if FrameworkEditor}
+        <div class="flex flex-col h-full" class:hidden={!editMode}>
+          <svelte:component this={FrameworkEditor}
+            framework={baseFrameworks[activeFrameworkIndex]}
+            onUpdate={handleFrameworkEdit}
+          />
+        </div>
+      {/if}
       <div class="overflow-y-auto flex-1" class:hidden={editMode}>
         <RequirementsTracker
           framework={activeFramework}
