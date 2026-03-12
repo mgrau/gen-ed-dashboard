@@ -196,28 +196,33 @@
     <h1 class="text-lg font-bold tracking-wide">ODU Gen Ed Dashboard</h1>
     <p class="text-xs text-blue-200">Faculty Simulation Tool</p>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="flex items-center gap-3 no-print">
     <span class="text-xs text-blue-300">Catalog Year: 2027–2028</span>
     <button
       class="text-xs px-2 py-1 rounded border transition-colors {copyConfirmed ? 'border-green-400 text-green-300' : 'border-blue-400 text-blue-300 hover:border-blue-200 hover:text-blue-100'}"
       on:click={copyLink}
     >{copyConfirmed ? '✓ Copied' : 'Copy link'}</button>
+    <button
+      class="text-xs px-2 py-1 rounded border border-blue-400 text-blue-300 hover:border-blue-200 hover:text-blue-100 transition-colors"
+      on:click={() => window.print()}
+    >Print / PDF</button>
   </div>
 </header>
 
-<FrameworkTabs
-  frameworks={baseFrameworks}
-  bind:activeIndex={activeFrameworkIndex}
-  bind:editMode
-  bind:compareMode
-/>
-
-<CreditSummaryBar framework={activeFramework} {evaluation} {placedCourses} />
+<div class="no-print">
+  <FrameworkTabs
+    frameworks={baseFrameworks}
+    bind:activeIndex={activeFrameworkIndex}
+    bind:editMode
+    bind:compareMode
+  />
+  <CreditSummaryBar framework={activeFramework} {evaluation} {placedCourses} />
+</div>
 
 <main class="flex flex-col md:flex-row overflow-hidden flex-1 min-h-0">
 
   <!-- Mobile: collapsible Plan dropdown -->
-  <div class="md:hidden shrink-0 bg-white border-b border-gray-200">
+  <div class="md:hidden shrink-0 bg-white border-b border-gray-200 no-print">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div
       role="button"
@@ -287,7 +292,7 @@
       {/each}
     </aside>
   {:else}
-    <aside class="hidden md:flex md:flex-col w-[360px] min-w-[280px] shrink-0 border-r border-gray-200 overflow-hidden bg-white">
+    <aside class="print-requirements hidden md:flex md:flex-col w-[360px] min-w-[280px] shrink-0 border-r border-gray-200 overflow-hidden bg-white">
       {#if FrameworkEditor}
         <div class="flex flex-col h-full" class:hidden={!editMode}>
           <svelte:component this={FrameworkEditor}
@@ -308,15 +313,15 @@
   {/if}
 
   <!-- Center + right on desktop / stacked on mobile -->
-  <div class="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
+  <div class="print-content-wrapper flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
 
     <!-- Semester Planner: top half on mobile, center on desktop -->
-    <section class="@container flex-1 min-h-0 overflow-y-auto p-4 border-b md:border-b-0 border-gray-200">
+    <section class="print-planner @container flex-1 min-h-0 overflow-y-auto p-4 border-b md:border-b-0 border-gray-200">
       <SemesterPlanner {semesterLabels} {semesters} {courseAssignment} />
     </section>
 
     <!-- Course Pool: bottom half on mobile, right aside on desktop -->
-    <aside class="flex-1 min-h-0 md:flex-none md:w-[380px] md:min-w-[300px] border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto bg-white flex flex-col">
+    <aside class="no-print flex-1 min-h-0 md:flex-none md:w-[380px] md:min-w-[300px] border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto bg-white flex flex-col">
       <div class="px-3 pt-4 pb-2 border-b border-gray-100 shrink-0">
         <h2 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Course Pool</h2>
         <p class="text-[10px] text-gray-400 mt-0.5">Click to place · drag to semester</p>

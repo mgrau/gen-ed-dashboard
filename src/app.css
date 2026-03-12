@@ -12,6 +12,94 @@
   }
 }
 
+@media print {
+  /* Reset viewport constraints */
+  html, body, #app {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Hide interactive / nav chrome */
+  .no-print { display: none !important; }
+
+  /* Page title injected before header */
+  header::before {
+    content: 'ODU General Education Dashboard';
+    display: block;
+    font-size: 9pt;
+    color: #6b7280;
+    margin-bottom: 2px;
+  }
+
+  /* Flatten the main flex layout */
+  main {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+
+  /* Requirements sidebar — full width, no scroll */
+  .print-requirements {
+    display: block !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 12pt;
+    margin-bottom: 12pt;
+  }
+
+  /* Semester planner — own page, full width, no scroll */
+  .print-planner {
+    flex: none !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    padding: 0 !important;
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Always show 4-column grid for semesters */
+  .print-planner .grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Prevent semester columns from breaking across pages */
+  .semester-col {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Release all height/overflow constraints on wrapper elements */
+  main,
+  .print-content-wrapper,
+  .print-planner,
+  .print-planner > * {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    flex: none !important;
+  }
+
+  /* Course cards: no grab cursor, no shadow */
+  .course-card {
+    cursor: default !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  /* Semester columns: no min-height constraint */
+  .semester-col { min-height: 0 !important; }
+
+  @page { size: landscape; margin: 1.5cm; }
+}
+
 @layer components {
   .req-row {
     @apply flex items-start gap-2 py-1.5 text-sm border-b border-gray-100 last:border-0;
