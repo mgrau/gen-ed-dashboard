@@ -6,6 +6,9 @@
   import { yaml } from '@codemirror/lang-yaml'
   import { basicSetup } from 'codemirror'
   import { indentWithTab } from '@codemirror/commands'
+  import { TAG_META } from '../lib/tags.js'
+
+  const knownTags = new Set(Object.keys(TAG_META))
 
   // ── Custom token highlighting ──────────────────────────────────────────────
 
@@ -59,6 +62,7 @@
   export let onUpdate = null
 
   let error = null
+  let unknownTags = []
   let originalYaml = ''
   let loadedFrameworkId = null
   let editorEl
@@ -75,15 +79,28 @@
     })
   }
 
+  function collectUnknownTags(sections) {
+    const found = []
+    for (const s of sections ?? []) {
+      for (const t of s.tags ?? []) {
+        if (!knownTags.has(t) && !found.includes(t)) found.push(t)
+      }
+      found.push(...collectUnknownTags(s.subcategories))
+    }
+    return found
+  }
+
   function parse(content) {
     try {
       const parsed = load(content)
       if (!parsed || typeof parsed !== 'object') throw new Error('Invalid framework structure')
       if (!parsed.sections || !Array.isArray(parsed.sections)) throw new Error('Framework must have a sections array')
       error = null
+      unknownTags = collectUnknownTags(parsed.sections)
       onUpdate?.(parsed)
     } catch (e) {
       error = e.message
+      unknownTags = []
     }
   }
 
@@ -150,9 +167,12 @@
   </div>
 
   <!-- Status bar -->
-  <div class="px-4 py-1.5 shrink-0 border-b border-gray-100 text-[10px] font-medium {error ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}">
+  <div class="px-4 py-1.5 shrink-0 border-b border-gray-100 text-[10px] font-medium
+    {error ? 'bg-red-50 text-red-600' : unknownTags.length ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-600'}">
     {#if error}
       ✕ {error}
+    {:else if unknownTags.length}
+      ⚠ Unknown tag{unknownTags.length > 1 ? 's' : ''}: {unknownTags.join(', ')}
     {:else}
       ✓ Valid
     {/if}
